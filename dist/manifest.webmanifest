@@ -1,8 +1,8 @@
 {
-  "name": "Galopins Arcade",
-  "short_name": "Galopins",
+  "name": "Volta Arcade",
+  "short_name": "Volta",
   "lang": "fr",
-  "description": "Tu es Max derrière le comptoir de Galopins. Deux minutes de service : tu fais mieux ?",
+  "description": "Tu es Etienne derrière le comptoir de Volta. Deux minutes de service : tu fais mieux ?",
   "start_url": "./",
   "display": "browser",
   "orientation": "portrait",

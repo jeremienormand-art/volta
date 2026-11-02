@@ -41,8 +41,8 @@ for taille, nom in [(512, 'icone-512.png'), (192, 'icone-192.png'), (180, 'icone
 # Raccourci sur l'écran d'accueil : le jeu s'ouvre dans le navigateur (display « browser »), pas en appli à part.
 # Sur iPhone, une appli à part aurait sa propre mémoire : le joueur y perdrait son nom au classement (clé du téléphone).
 (dist / 'manifest.webmanifest').write_text(json.dumps({
-    'name': 'Galopins Arcade', 'short_name': 'Galopins', 'lang': 'fr',
-    'description': 'Tu es Max derrière le comptoir de Galopins. Deux minutes de service : tu fais mieux ?',
+    'name': 'Volta Arcade', 'short_name': 'Volta', 'lang': 'fr',
+    'description': 'Tu es Etienne derrière le comptoir de Volta. Deux minutes de service : tu fais mieux ?',
     'start_url': './', 'display': 'browser', 'orientation': 'portrait',
     'background_color': NUIT, 'theme_color': NUIT,
     'icons': [{'src': 'icone-192.png', 'sizes': '192x192', 'type': 'image/png'},
