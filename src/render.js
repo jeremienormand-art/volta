@@ -214,7 +214,7 @@ function drawCustomer(ctx, g, s, now) {
 const TALK = {
   nico: {
     first: 'Je suis off aujourd’hui !', reply: 'Et moi, je bosse pour deux…',
-    again: ['Encore moi !', 'Je regarde comment tu bosses.', 'Off, je te dis !', 'Tu tires mieux que moi…'],
+    again: ['Encore moi !', 'Je regarde comment tu bosses.', 'Off, je te dis !', 'Tu sers mieux que moi…'],
     served: ['Merci collègue !', 'Pas mal, pour un débutant.', 'Service nickel !'],
     wrong: 'C’est pas ma commande, ça !', left: 'Je vais me servir moi-même !',
   },
@@ -346,7 +346,7 @@ function drawAlexOffer(ctx, g, s, x, off, now) {
   ctx.save();
   ctx.translate(tx, top + h); ctx.scale(pop, pop); ctx.translate(-tx, -(top + h));
   // appel
-  const lab = 'TOUCHE ALEX', lw = 84;
+  const lab = 'TOUCHE MICHEL', lw = 84;
   ctx.fillStyle = C.nuit; rr(ctx, bx + (w - lw) / 2, top - 16, lw, 20, 7); ctx.fill();
   text(ctx, lab, bx + w / 2, top - 2, 10, urgent && Math.floor(now * 6) % 2 ? C.rose : C.creme, { weight: 800 });
   // bulle

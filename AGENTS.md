@@ -14,7 +14,11 @@ Projet séparé : ne rien modifier dans le dépôt `galopins-arcade`, ne jamais 
 - Instagram vide : pas de néon, pas de rappel sur le ticket, pas d'enseigne sur la story (« partage ton score »).
 - Mode public : nom d'hôte qui contient `THEME.motPublic` (« volta »). Ailleurs (lien claude.ai, fichier local, `?test`) : mode test.
 - Étape 1 (2 novembre 2026, faite) : nom, lieu, partages, story, Instagram, adresse publique, Worker.
-- Étape 2 (à faire, d'après la liste d'Anaïs) : boissons (noms et phrases : IPA, stout, spritz, shot, pinte…), personnages (Max, Alex, Hugo, Jérémie, amis), répliques. Les mots sont dans `src/main.js`, `src/scene.js`, `src/coach.js`, `src/core.js`, `src/config.js` (`DRINK_NAMES`). Les mettre dans `src/theme.js` au fur et à mesure.
+- Étape 2 (2 novembre 2026, faite, liste d'Anaïs) : textes et personnages, visuels de Galopins gardés en attendant.
+  - Boissons (`DRINK_NAMES`, `src/config.js`) : IPA → Chocolat (au maintien, zone dorée), stout → Matcha (lancé, infuse, repris), spritz → Expresso, shot → Croissant. L'inversion de Michel suit Anaïs : chocolat ⇄ matcha, expresso ⇄ croissant.
+  - Personnages : Max → Etienne (le barista joué), Alex → Michel (la blague de trop : il raconte une blague salace, censurée « ★#@! », Etienne est mal à l'aise, commandes inversées et points ×2), Hugo → Fabien (la visite client, même rush), Jérémie → Marie (contrôle qualité sur le chocolat ; au second passage elle sort de sa séance, « affamée », et un croissant donne +300).
+  - Bonus de Michel (seul changement de logique, demande d'Anaïs « bonus si pas d'erreur ») : à la fin de l'effet, +500 si au moins une commande servie et aucune erreur (`alexCleanBonus`, `alexEndEffect`, `src/core.js`) ; addition : « Blague de Michel · zéro faute +500 ». Au simulateur : menu Michel −1 % (bon) et +3 % (expert) face au menu Marie.
+  - Identifiants du code inchangés (`alex`, `hugo`, `jeremie`, `ipa`…) : seuls les textes affichés changent. Nico garde ses répliques (il est « off », collègue).
 - Étape 3 : visuels de ChatGPT aux mêmes formats et noms de fichiers (voir `docs/chatgpt/prompts.md`, `assets/sources/LIRE-MOI.md`) ; `dist/apercu.jpg` et les icônes portent encore Galopins (`tools/pack-apercu.py`, `tools/pack-icone.py`).
 
 ## Structure, tests, décisions

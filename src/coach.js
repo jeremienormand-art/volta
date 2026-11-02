@@ -86,10 +86,10 @@ function coachText(g, cfg, st) {
   const many = g.trayMax() > 1;
   switch (st.kind) {
     case 'hold':
-      if (n === 'cancel') return { main: 'Garde le doigt appuyé', sub: 'le verre se remplit', tone: 'warn' };
+      if (n === 'cancel') return { main: 'Garde le doigt appuyé', sub: 'la tasse se remplit', tone: 'warn' };
       if (n === 'overflow') return { main: 'Trop plein !', sub: 'relâche plus tôt, dans le rose', tone: 'warn' };
       if (n === 'low' || g.tray.some((x) => x.q === 'low')) return { main: 'Pas assez remplie !', sub: 'maintiens pour la compléter', tone: 'warn' };
-      return { main: 'Maintiens ici', sub: 'le verre se remplit' };
+      return { main: 'Maintiens ici', sub: 'la tasse se remplit' };
     case 'release': {
       const f = g.st.ipa.fill;
       if (f >= cfg.perfectLo && f <= cfg.perfectHi) return { main: 'Relâche maintenant !', tone: 'rose' };
@@ -97,14 +97,14 @@ function coachText(g, cfg, st) {
       return { main: 'Garde le doigt appuyé', sub: 'lâche dans la zone rose' };
     }
     case 'tap':
-      return { main: 'Touche ici', sub: cfg.prep === 'simple' ? (many ? 'le verre va sur ton plateau' : 'Max prend le verre') : 'un toucher suffit' };
-    case 'stoutLaunch': return { main: 'Touche pour lancer la stout', sub: 'elle doit reposer un peu' };
-    case 'stoutRest': return { main: 'La stout repose…', sub: 'reviens la prendre quand elle est prête' };
+      return { main: 'Touche ici', sub: cfg.prep === 'simple' ? (many ? 'la commande va sur ton plateau' : 'Etienne prend la commande') : 'un toucher suffit' };
+    case 'stoutLaunch': return { main: 'Touche pour lancer le matcha', sub: 'elle doit reposer un peu' };
+    case 'stoutRest': return { main: 'Le matcha infuse…', sub: 'reviens la prendre quand elle est prête' };
     case 'stoutReady': return { main: 'Elle est prête !', sub: 'touche pour la prendre', tone: 'rose' };
     case 'serve':
       if (n === 'tapTray') return { main: 'Garde le doigt sur le plateau', sub: 'et glisse jusqu’au client', tone: 'warn' };
       if (n === 'miss') return { main: 'Lâche sur le client', sub: 'glisse jusqu’à lui', tone: 'warn' };
-      return { main: many ? 'Glisse le plateau vers le client' : 'Glisse le verre vers le client' };
+      return { main: many ? 'Glisse le plateau vers le client' : 'Glisse le plateau vers le client' };
     case 'drop': return { main: 'Lâche sur le client' };
   }
   return null;

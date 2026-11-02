@@ -49,12 +49,12 @@
       </button>
       <div class="t-sign">
         <h1 id="tTitle" class="t-logo"><span class="sr-only">{{lieu}} </span>Arcade</h1>
-        <p class="t-tag">Tu es Max, derrière le comptoir.</p>
+        <p class="t-tag">Tu es Etienne, derrière le comptoir.</p>
       </div>
       <div class="t-counter">
         <div class="t-host">
           <div class="t-max" role="img" aria-label="Max, le barman, essuie un verre"></div>
-          <p class="t-say"><span id="tSay">Deux minutes de service. Le bar va vite se remplir !</span><span id="tRankLead" class="t-say-rank" hidden></span></p>
+          <p class="t-say"><span id="tSay">Deux minutes de service. Le comptoir va vite se remplir !</span><span id="tRankLead" class="t-say-rank" hidden></span></p>
         </div>
         <div class="t-bar">
           <ol class="t-steps" aria-label="Comment jouer">
@@ -62,7 +62,7 @@
             <li><span class="t-ico t-ico-tray" aria-hidden="true"><i></i></span><b>Glisse</b><small id="tStep2">le plateau</small></li>
             <li><span class="t-ico t-ico-cust" aria-hidden="true"></span><b>Sers</b><small>le bon client</small></li>
           </ol>
-          <p class="t-note">La première fois, Max te guide geste par geste. Le chrono attend.</p>
+          <p class="t-note">La première fois, Etienne te guide geste par geste. Le chrono attend.</p>
           <button type="button" id="bStart" class="primary t-go">Ouvrir le bar</button>
           <div class="t-foot">
             <p id="tBest" class="t-best"></p>
@@ -81,7 +81,7 @@
       <div class="t-counter">
         <div class="t-host">
           <div class="t-max" role="img" aria-label="Max essuie un verre en t'attendant"></div>
-          <p class="t-say p-say"><span id="pSay">Je t’attends. Les clients aussi…</span><span id="pBack" class="p-say-back" hidden>Encore un geste « retour » et tu quittes le bar !</span></p>
+          <p class="t-say p-say"><span id="pSay">Je t’attends. Les clients aussi…</span><span id="pBack" class="p-say-back" hidden>Encore un geste « retour » et tu quittes le comptoir !</span></p>
         </div>
         <div class="t-bar">
           <dl class="p-stats">
@@ -104,7 +104,7 @@
         <div class="r-shadow">
           <article class="receipt">
             <header class="r-head">
-              <p class="r-shop">GALOPINS ARCADE</p>
+              <p class="r-shop">{{enseigne}} ARCADE</p>
               <p id="eMeta" class="r-meta"></p>
             </header>
             <h2 id="eTitle" class="r-title">L’addition</h2>
@@ -146,7 +146,7 @@
                  v1.39 : seulement après un premier toucher du néon de la barre du bas (rappel discret). -->
             <a id="eInsta" class="r-insta" href="https://www.instagram.com/{{insta}}/" target="_blank" rel="noopener" hidden>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5a2 2 0 0 1 2-2h2.6l1.6-2.5h5.6l1.6 2.5H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13.6" r="3.7"/></svg>
-              <span><small>Suis le bar sur Instagram</small><b>@{{insta}}</b></span>
+              <span><small>Suis-nous sur Instagram</small><b>@{{insta}}</b></span>
             </a>
             <p id="eModes" class="r-fine"></p>
           </article>

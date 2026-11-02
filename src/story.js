@@ -120,7 +120,7 @@ function drawStory(info) {
   let y = ty + 56 + 30;
   const d = new Date(info.at || Date.now()), two = (n) => String(n).padStart(2, '0');
   ctx.font = `400 34px ${STORY_MONO}`; ctx.fillStyle = STORY_SOFT; ctx.textAlign = 'center';
-  ctx.fillText(storyStr(`Service du ${two(d.getDate())}/${two(d.getMonth() + 1)} · barman : Max`), cx, y);
+  ctx.fillText(storyStr(`Service du ${two(d.getDate())}/${two(d.getMonth() + 1)} · barista : Etienne`), cx, y);
   y += 34; storyDash(ctx, x0, x1, y);
   y += 64; ctx.font = `400 44px ${STORY_MONO}`; ctx.fillStyle = STORY_INK; storySpaced(ctx, 'L’ADDITION', cx, y, 7);
   for (const [k, v] of rows) { y += 58; storyLine(ctx, k, v, x0, x1, y, 42); }

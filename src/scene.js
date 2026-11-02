@@ -496,7 +496,7 @@ function drawAlexPeek(ctx, g, now) {
   drawCharacterBust(ctx, x - 39, L.counterTop - 113, 78, 119, ALEX_SPEC, {mood:'proud'});
   drawGlass(ctx, 'shot', x - 40, y + 10, 1.3, 1);
   ctx.fillStyle = C.rose; rr(ctx, 150, y - 84, 156, 30, 15); ctx.fill();
-  text(ctx, 'Max ! Un p’tit shot ?', 228, y - 64, 12.5, C.ink, { weight: 800 });
+  text(ctx, 'Etienne ! J’en ai une bonne…', 228, y - 64, 12.5, C.ink, { weight: 800 });
 }
 
 // ── Bandeaux d'événements ──
@@ -536,7 +536,7 @@ function drawEventStrip(ctx, g, cfg, now) {
     const hugo = g.hugo, tier = g.hugoTier(), done = tier === 3;
     barPanel(ctx, 8, y, 344, h);
     drawCharacterFace(ctx, 12, y + 2, 38, h - 4, HUGO_SPEC, {mood: hugoMood(g)});
-    text(ctx, 'RUSH D’HUGO', 54, titleY, 11, C.creme, {weight:800,align:'left'});
+    text(ctx, 'VISITE CLIENT', 54, titleY, 11, C.creme, {weight:800,align:'left'});
     // v1.25 : la médaille déjà gagnée, et le palier suivant tant qu'on n'est pas à l'argent
     const detail = tier < 2 ? `${hugo.served} / ${hugo.target} · ${TIER_NAME[tier + 1]} à ${hugo.tiers[tier]}` : `${hugo.served} / ${hugo.target} boissons`;
     text(ctx, detail, 54, detailY, 12, done ? C.good : C.cremeD, {weight:800,align:'left'});
@@ -545,22 +545,22 @@ function drawEventStrip(ctx, g, cfg, now) {
   } else if (g.alexActive()) {
     barPanel(ctx, 8, y, 344, h);
     drawCharacterFace(ctx, 12, y + 2, 38, h - 4, ALEX_SPEC, {mood:'proud'});
-    text(ctx, `ALEX · POINTS ×${String(cfg.alexMult).replace('.', ',')}`, 54, titleY, 11, C.rose, {weight:800,align:'left'});
+    text(ctx, `MICHEL · POINTS ×${String(cfg.alexMult).replace('.', ',')}`, 54, titleY, 11, C.rose, {weight:800,align:'left'});
     if (cfg.alexMode === 'inversion') {
       for (const [a,b,x] of [['ipa','stout',65],['spritz','shot',159]]) {
         drawGlass(ctx,a,x,detailY + (compact ? 3 : 6),compact ? 0.48 : 0.62,1);
         drawUIIcon(ctx,'swap',x + 13,detailY - 12,compact ? 14 : 17);
         drawGlass(ctx,b,x + 43,detailY + (compact ? 3 : 6),compact ? 0.48 : 0.62,1);
       }
-    } else text(ctx, 'TIREUSES À L’ENVERS', 54, detailY, 10.5, C.cremeD, {weight:800,align:'left'});
+    } else text(ctx, 'POSTES À L’ENVERS', 54, detailY, 10.5, C.cremeD, {weight:800,align:'left'});
     drawEventTimer(ctx, g.alex.effectEnd - g.t, cfg.alexDuration, 278, timerY, timerH);
   } else if (g.jer.state === 'seat' && g.seats[g.jer.seat] && g.seats[g.jer.seat].isJer && g.seats[g.jer.seat].phase !== 'leave') {
     // v1.26 : Jérémie au comptoir. Ce qu'il veut, ce qu'on y gagne, et le temps qu'il nous laisse.
     const s = g.seats[g.jer.seat], mult = String(cfg.jeremieMult).replace('.', ',');
     barPanel(ctx, 8, y, 344, h);
     drawJeremieFace(ctx, 12, y + 2, 38, h - 4, jeremieMood(s));
-    text(ctx, s.tipsy ? 'JÉRÉMIE · IL REPASSE' : 'JÉRÉMIE · CONTRÔLE QUALITÉ', 54, titleY, 11, C.gold, {weight:800,align:'left'});
-    const detail = s.tipsy ? `Une IPA = points ×${mult} · ${cfg.jeremieBoost} clients` : `Zone dorée = points ×${mult} · ${cfg.jeremieBoost} clients`;
+    text(ctx, s.tipsy ? 'MARIE · ELLE REPASSE' : 'MARIE · CONTRÔLE QUALITÉ', 54, titleY, 11, C.gold, {weight:800,align:'left'});
+    const detail = s.tipsy ? `Un croissant = points ×${mult} · ${cfg.jeremieBoost} clients` : `Zone dorée = points ×${mult} · ${cfg.jeremieBoost} clients`;
     text(ctx, detail, 54, detailY, compact ? 10.5 : 11.5, C.cremeD, {weight:800,align:'left'});
     if (s.phase === 'wait' || s.phase === 'arrive') drawEventTimer(ctx, s.patience, s.pmax, 278, timerY, timerH);
   } else if (g.jer.boost > 0) {
@@ -726,7 +726,7 @@ function drawBanner(ctx, b) {
     ctx.restore();
   }
   if (b.sub) text(ctx, b.sub, 0, h - 17, 12.5, lit > 0 ? 'rgba(247,235,213,0.92)' : 'rgba(247,235,213,0.55)', { weight: 800 });
-  if (b.medal) drawMedal(ctx, b.medal, w / 2 - 30, -16, 40);   // v1.25 : médaille d'Hugo épinglée au coin de l'enseigne
+  if (b.medal) drawMedal(ctx, b.medal, w / 2 - 30, -16, 40);   // v1.25 : médaille d'Fabien épinglée au coin de l'enseigne
   ctx.restore();
   if (face) { // le visage arrive par la gauche, posé contre l'enseigne
     const k = ease.back(Math.min(1, Math.max(0, u - 0.1) / 0.3)), fw = 104, fh = 130;
@@ -796,10 +796,10 @@ function drawBell(ctx, ang, a = 1) {
 // Max réagit à droite, la règle est écrite sur l'ardoise qui passe devant eux comme le comptoir.
 // Une seule entrée animée (≈ 0,6 s), puis tout ressort par la droite.
 const CARD = {
-  alex: { name: 'ALEX', tag: 'Le shot de trop', tone: 'rose', band: ['#F39BB1', '#D7607F', '#9E3B58'], mood: 'proud', maxMood: 'tipsy', line: 'Allez, un petit !' },
-  hugo: { name: 'HUGO', tag: 'Le coup de pression', tone: 'orange', band: ['#5C93CF', '#2F5F99', '#1C3B63'], mood: 'focus', maxMood: 'panic', line: 'On accélère !' },
+  alex: { name: 'MICHEL', tag: 'La blague de trop', tone: 'rose', band: ['#F39BB1', '#D7607F', '#9E3B58'], mood: 'proud', maxMood: 'oops', line: 'Et là, le coach… ★#@!' },
+  hugo: { name: 'FABIEN', tag: 'La visite client', tone: 'orange', band: ['#5C93CF', '#2F5F99', '#1C3B63'], mood: 'focus', maxMood: 'panic', line: 'Visite client, on assure !' },
   // v1.26 : bande ambrée comme une IPA
-  jeremie: { name: 'JÉRÉMIE', tag: 'Le contrôle qualité', tone: 'blanc', band: ['#F7C66A', '#D9962E', '#9A6018'], mood: 'idle', maxMood: 'sweat', line: 'Contrôle qualité !' },
+  jeremie: { name: 'MARIE', tag: 'Le contrôle qualité', tone: 'blanc', band: ['#C98B5E', '#8E5A36', '#5A3520'], mood: 'idle', maxMood: 'sweat', line: 'Contrôle qualité !' },
 };
 const CARD_H = 470;   // du haut du nom au bas de l'ardoise
 function cardTop() { return Math.max(L.hudH + 6, Math.round((L.H - CARD_H - 40) * 0.5)); }
@@ -885,16 +885,16 @@ function drawCut(ctx, g, cfg, cut, now) {
     }
     text(ctx, `Points ×${mult} pendant ${cfg.alexDuration} secondes`, 180, sy + 131, 13, C.cremeD, { weight: 800 });
   } else if (alex) {
-    text(ctx, 'TIREUSES À L’ENVERS', 180, sy + 54, 34, C.creme, { pixel: true });
+    text(ctx, 'POSTES À L’ENVERS', 180, sy + 54, 34, C.creme, { pixel: true });
     text(ctx, 'Les bulles, elles, disent vrai.', 180, sy + 88, 15, C.creme, { weight: 800 });
     text(ctx, `Points ×${mult} pendant ${cfg.alexDuration} secondes`, 180, sy + 128, 13, C.cremeD, { weight: 800 });
   } else if (jer) { // v1.26 : la règle du contrôle qualité
     drawGlass(ctx, 'ipa', 46, sy + 66, 1.15, 1);
     drawUIIcon(ctx, 'star', 290, sy + 20, 36);
-    text(ctx, 'UNE IPA', 180, sy + 44, 34, C.creme, { pixel: true });
-    text(ctx, 'PARFAITE', 180, sy + 80, 34, C.gold, { pixel: true });
-    text(ctx, 'Tirée devant lui, dans la zone dorée.', 180, sy + 106, 14, C.creme, { weight: 800 });
-    text(ctx, `Approuvée : points ×${String(cfg.jeremieMult).replace('.', ',')} sur ${cfg.jeremieBoost} clients`, 180, sy + 131, 13, C.cremeD, { weight: 800 });
+    text(ctx, 'UN CHOCOLAT', 180, sy + 44, 34, C.creme, { pixel: true });
+    text(ctx, 'PARFAIT', 180, sy + 80, 34, C.gold, { pixel: true });
+    text(ctx, 'Versé devant elle, dans la zone dorée.', 180, sy + 106, 14, C.creme, { weight: 800 });
+    text(ctx, `Approuvé : points ×${String(cfg.jeremieMult).replace('.', ',')} sur ${cfg.jeremieBoost} clients`, 180, sy + 131, 13, C.cremeD, { weight: 800 });
   } else {
     const n = String(g.hugo.target);
     ctx.font = `400 92px ${FONT_P}`; const nw = ctx.measureText(n).width;

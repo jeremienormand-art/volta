@@ -1,11 +1,11 @@
 // Généré par build.mjs : ne pas modifier à la main (copie de src/config.js et src/core.js pour le Worker).
-export const LOGIC_ID = 'f3f3fdf49e11';
+export const LOGIC_ID = '0e78b8cf5ef5';
 // ─────────────────────────────────────────────────────────────
 // CONFIG — tout l'équilibrage du jeu. Rien d'autre à toucher pour régler.
 // Les valeurs sont des hypothèses de test, modifiables en jeu (panneau Réglages).
 // ─────────────────────────────────────────────────────────────
 const DRINKS = ['ipa', 'stout', 'spritz', 'shot'];
-const DRINK_NAMES = { ipa: 'IPA', stout: 'Stout', spritz: 'Spritz', shot: 'Shot' };
+const DRINK_NAMES = { ipa: 'Chocolat', stout: 'Matcha', spritz: 'Expresso', shot: 'Croissant' };
 // Alex « inversion » : correspondance fixe, une seule règle à retenir.
 const INV = { ipa: 'stout', stout: 'ipa', spritz: 'shot', shot: 'spritz' };
 const LAYOUT_NORMAL = ['ipa', 'stout', 'spritz', 'shot'];
@@ -52,6 +52,7 @@ const DEFAULTS = {
   alexShot: 'choix',        // 'choix' : Alex s'installe avec son plateau, le joueur trinque ou non · 'impose' : Alex fait boire Max
   alexDuration: 12,         // s d'effet
   alexMult: 2,              // multiplicateur de points pendant l'effet
+  alexCleanBonus: 500,      // Volta : bonus à la fin de la blague de Michel si aucune erreur pendant l'effet
   alexOfferTime: 5,         // s pour accepter (mode choix)
   alexSecondChance: 0.4,    // probabilité d'un second passage
 
@@ -719,9 +720,13 @@ class Game {
   }
 
   alexEndEffect() {
-    this.alex.state = 'done';
+    const a = this.alex, st = this.stats;
+    a.state = 'done';
     if (this.cfg.alexMode === 'miroir') this.requestSwap();
-    this.emit('alexEnd');
+    // Volta (Anaïs) : la blague de Michel rapporte un bonus si on a servi pendant l'effet sans aucune erreur
+    const clean = st.alexErrors === a.err0 && st.alexDrinks > a.drk0 ? this.cfg.alexCleanBonus : 0;
+    if (clean) { this.addScore(clean); st.alexClean = (st.alexClean || 0) + clean; }
+    this.emit('alexEnd', { clean });
   }
 
   // ── Hugo, le coup de pression ──
@@ -770,6 +775,7 @@ class Game {
       a.state = 'effect';
       a.effectEnd = this.t + c.alexDuration;
       a.warned = false;
+      a.err0 = this.stats.alexErrors; a.drk0 = this.stats.alexDrinks;   // Volta : bonus si aucune erreur pendant l'effet
       if (c.alexMode === 'miroir') this.requestSwap();
       this.emit('alexEffect', { mode: c.alexMode });
     } else if (kind === 'hugo') {

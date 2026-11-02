@@ -597,9 +597,13 @@ class Game {
   }
 
   alexEndEffect() {
-    this.alex.state = 'done';
+    const a = this.alex, st = this.stats;
+    a.state = 'done';
     if (this.cfg.alexMode === 'miroir') this.requestSwap();
-    this.emit('alexEnd');
+    // Volta (Anaïs) : la blague de Michel rapporte un bonus si on a servi pendant l'effet sans aucune erreur
+    const clean = st.alexErrors === a.err0 && st.alexDrinks > a.drk0 ? this.cfg.alexCleanBonus : 0;
+    if (clean) { this.addScore(clean); st.alexClean = (st.alexClean || 0) + clean; }
+    this.emit('alexEnd', { clean });
   }
 
   // ── Hugo, le coup de pression ──
@@ -648,6 +652,7 @@ class Game {
       a.state = 'effect';
       a.effectEnd = this.t + c.alexDuration;
       a.warned = false;
+      a.err0 = this.stats.alexErrors; a.drk0 = this.stats.alexDrinks;   // Volta : bonus si aucune erreur pendant l'effet
       if (c.alexMode === 'miroir') this.requestSwap();
       this.emit('alexEffect', { mode: c.alexMode });
     } else if (kind === 'hugo') {

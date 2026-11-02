@@ -3,7 +3,7 @@
 // Les valeurs sont des hypothèses de test, modifiables en jeu (panneau Réglages).
 // ─────────────────────────────────────────────────────────────
 const DRINKS = ['ipa', 'stout', 'spritz', 'shot'];
-const DRINK_NAMES = { ipa: 'IPA', stout: 'Stout', spritz: 'Spritz', shot: 'Shot' };
+const DRINK_NAMES = { ipa: 'Chocolat', stout: 'Matcha', spritz: 'Expresso', shot: 'Croissant' };
 // Alex « inversion » : correspondance fixe, une seule règle à retenir.
 const INV = { ipa: 'stout', stout: 'ipa', spritz: 'shot', shot: 'spritz' };
 const LAYOUT_NORMAL = ['ipa', 'stout', 'spritz', 'shot'];
@@ -50,6 +50,7 @@ const DEFAULTS = {
   alexShot: 'choix',        // 'choix' : Alex s'installe avec son plateau, le joueur trinque ou non · 'impose' : Alex fait boire Max
   alexDuration: 12,         // s d'effet
   alexMult: 2,              // multiplicateur de points pendant l'effet
+  alexCleanBonus: 500,      // Volta : bonus à la fin de la blague de Michel si aucune erreur pendant l'effet
   alexOfferTime: 5,         // s pour accepter (mode choix)
   alexSecondChance: 0.4,    // probabilité d'un second passage
 

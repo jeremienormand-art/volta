@@ -6,4 +6,4 @@ Le jeu de service de Galopins Arcade, habillé pour Volta : un espace barista da
 - **Le jeu en un fichier** : `dist/galopins-arcade.html` (s'ouvre directement dans un navigateur).
 - **Ce qui fait Volta** : `src/theme.js` (nom, lieu, Instagram, adresse). Les visuels sont dans `assets/`.
 
-Version : 1.0 (2 novembre 2026), copie de Galopins Arcade 1.50 avec le nom, les partages et la story de Volta. Boissons, personnages et visuels de Galopins en attendant ceux de Volta.
+Version : 1.1 (2 novembre 2026) — boissons (chocolat, matcha, expresso, croissant), personnages (Etienne, Michel, Fabien, Marie) et répliques de Volta, bonus de Michel sans erreur ; visuels de Galopins en attendant ceux de Volta. v1.0 : copie de Galopins Arcade 1.50 avec le nom, les partages et la story de Volta.

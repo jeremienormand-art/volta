@@ -589,12 +589,12 @@ html, body { overscroll-behavior: none; }
       </button>
       <div class="t-sign">
         <h1 id="tTitle" class="t-logo"><span class="sr-only">Volta </span>Arcade</h1>
-        <p class="t-tag">Tu es Max, derrière le comptoir.</p>
+        <p class="t-tag">Tu es Etienne, derrière le comptoir.</p>
       </div>
       <div class="t-counter">
         <div class="t-host">
           <div class="t-max" role="img" aria-label="Max, le barman, essuie un verre"></div>
-          <p class="t-say"><span id="tSay">Deux minutes de service. Le bar va vite se remplir !</span><span id="tRankLead" class="t-say-rank" hidden></span></p>
+          <p class="t-say"><span id="tSay">Deux minutes de service. Le comptoir va vite se remplir !</span><span id="tRankLead" class="t-say-rank" hidden></span></p>
         </div>
         <div class="t-bar">
           <ol class="t-steps" aria-label="Comment jouer">
@@ -602,7 +602,7 @@ html, body { overscroll-behavior: none; }
             <li><span class="t-ico t-ico-tray" aria-hidden="true"><i></i></span><b>Glisse</b><small id="tStep2">le plateau</small></li>
             <li><span class="t-ico t-ico-cust" aria-hidden="true"></span><b>Sers</b><small>le bon client</small></li>
           </ol>
-          <p class="t-note">La première fois, Max te guide geste par geste. Le chrono attend.</p>
+          <p class="t-note">La première fois, Etienne te guide geste par geste. Le chrono attend.</p>
           <button type="button" id="bStart" class="primary t-go">Ouvrir le bar</button>
           <div class="t-foot">
             <p id="tBest" class="t-best"></p>
@@ -621,7 +621,7 @@ html, body { overscroll-behavior: none; }
       <div class="t-counter">
         <div class="t-host">
           <div class="t-max" role="img" aria-label="Max essuie un verre en t'attendant"></div>
-          <p class="t-say p-say"><span id="pSay">Je t’attends. Les clients aussi…</span><span id="pBack" class="p-say-back" hidden>Encore un geste « retour » et tu quittes le bar !</span></p>
+          <p class="t-say p-say"><span id="pSay">Je t’attends. Les clients aussi…</span><span id="pBack" class="p-say-back" hidden>Encore un geste « retour » et tu quittes le comptoir !</span></p>
         </div>
         <div class="t-bar">
           <dl class="p-stats">
@@ -644,7 +644,7 @@ html, body { overscroll-behavior: none; }
         <div class="r-shadow">
           <article class="receipt">
             <header class="r-head">
-              <p class="r-shop">GALOPINS ARCADE</p>
+              <p class="r-shop">VOLTA ARCADE</p>
               <p id="eMeta" class="r-meta"></p>
             </header>
             <h2 id="eTitle" class="r-title">L’addition</h2>
@@ -686,7 +686,7 @@ html, body { overscroll-behavior: none; }
                  v1.39 : seulement après un premier toucher du néon de la barre du bas (rappel discret). -->
             <a id="eInsta" class="r-insta" href="https://www.instagram.com//" target="_blank" rel="noopener" hidden>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5a2 2 0 0 1 2-2h2.6l1.6-2.5h5.6l1.6 2.5H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13.6" r="3.7"/></svg>
-              <span><small>Suis le bar sur Instagram</small><b>@</b></span>
+              <span><small>Suis-nous sur Instagram</small><b>@</b></span>
             </a>
             <p id="eModes" class="r-fine"></p>
           </article>
@@ -789,7 +789,7 @@ html, body { overscroll-behavior: none; }
 <script>
 (function () {
 'use strict';
-const LOGIC_ID = 'f3f3fdf49e11';
+const LOGIC_ID = '0e78b8cf5ef5';
 // ===== theme.js =====
 // ─────────────────────────────────────────────────────────────
 // THÈME — tout ce qui fait « Volta » plutôt que « Galopins ».
@@ -816,7 +816,7 @@ const THEME = {
 // Les valeurs sont des hypothèses de test, modifiables en jeu (panneau Réglages).
 // ─────────────────────────────────────────────────────────────
 const DRINKS = ['ipa', 'stout', 'spritz', 'shot'];
-const DRINK_NAMES = { ipa: 'IPA', stout: 'Stout', spritz: 'Spritz', shot: 'Shot' };
+const DRINK_NAMES = { ipa: 'Chocolat', stout: 'Matcha', spritz: 'Expresso', shot: 'Croissant' };
 // Alex « inversion » : correspondance fixe, une seule règle à retenir.
 const INV = { ipa: 'stout', stout: 'ipa', spritz: 'shot', shot: 'spritz' };
 const LAYOUT_NORMAL = ['ipa', 'stout', 'spritz', 'shot'];
@@ -863,6 +863,7 @@ const DEFAULTS = {
   alexShot: 'choix',        // 'choix' : Alex s'installe avec son plateau, le joueur trinque ou non · 'impose' : Alex fait boire Max
   alexDuration: 12,         // s d'effet
   alexMult: 2,              // multiplicateur de points pendant l'effet
+  alexCleanBonus: 500,      // Volta : bonus à la fin de la blague de Michel si aucune erreur pendant l'effet
   alexOfferTime: 5,         // s pour accepter (mode choix)
   alexSecondChance: 0.4,    // probabilité d'un second passage
 
@@ -1531,9 +1532,13 @@ class Game {
   }
 
   alexEndEffect() {
-    this.alex.state = 'done';
+    const a = this.alex, st = this.stats;
+    a.state = 'done';
     if (this.cfg.alexMode === 'miroir') this.requestSwap();
-    this.emit('alexEnd');
+    // Volta (Anaïs) : la blague de Michel rapporte un bonus si on a servi pendant l'effet sans aucune erreur
+    const clean = st.alexErrors === a.err0 && st.alexDrinks > a.drk0 ? this.cfg.alexCleanBonus : 0;
+    if (clean) { this.addScore(clean); st.alexClean = (st.alexClean || 0) + clean; }
+    this.emit('alexEnd', { clean });
   }
 
   // ── Hugo, le coup de pression ──
@@ -1582,6 +1587,7 @@ class Game {
       a.state = 'effect';
       a.effectEnd = this.t + c.alexDuration;
       a.warned = false;
+      a.err0 = this.stats.alexErrors; a.drk0 = this.stats.alexDrinks;   // Volta : bonus si aucune erreur pendant l'effet
       if (c.alexMode === 'miroir') this.requestSwap();
       this.emit('alexEffect', { mode: c.alexMode });
     } else if (kind === 'hugo') {
@@ -2449,7 +2455,7 @@ function drawCustomer(ctx, g, s, now) {
 const TALK = {
   nico: {
     first: 'Je suis off aujourd’hui !', reply: 'Et moi, je bosse pour deux…',
-    again: ['Encore moi !', 'Je regarde comment tu bosses.', 'Off, je te dis !', 'Tu tires mieux que moi…'],
+    again: ['Encore moi !', 'Je regarde comment tu bosses.', 'Off, je te dis !', 'Tu sers mieux que moi…'],
     served: ['Merci collègue !', 'Pas mal, pour un débutant.', 'Service nickel !'],
     wrong: 'C’est pas ma commande, ça !', left: 'Je vais me servir moi-même !',
   },
@@ -2581,7 +2587,7 @@ function drawAlexOffer(ctx, g, s, x, off, now) {
   ctx.save();
   ctx.translate(tx, top + h); ctx.scale(pop, pop); ctx.translate(-tx, -(top + h));
   // appel
-  const lab = 'TOUCHE ALEX', lw = 84;
+  const lab = 'TOUCHE MICHEL', lw = 84;
   ctx.fillStyle = C.nuit; rr(ctx, bx + (w - lw) / 2, top - 16, lw, 20, 7); ctx.fill();
   text(ctx, lab, bx + w / 2, top - 2, 10, urgent && Math.floor(now * 6) % 2 ? C.rose : C.creme, { weight: 800 });
   // bulle
@@ -3151,7 +3157,7 @@ function drawAlexPeek(ctx, g, now) {
   drawCharacterBust(ctx, x - 39, L.counterTop - 113, 78, 119, ALEX_SPEC, {mood:'proud'});
   drawGlass(ctx, 'shot', x - 40, y + 10, 1.3, 1);
   ctx.fillStyle = C.rose; rr(ctx, 150, y - 84, 156, 30, 15); ctx.fill();
-  text(ctx, 'Max ! Un p’tit shot ?', 228, y - 64, 12.5, C.ink, { weight: 800 });
+  text(ctx, 'Etienne ! J’en ai une bonne…', 228, y - 64, 12.5, C.ink, { weight: 800 });
 }
 
 // ── Bandeaux d'événements ──
@@ -3191,7 +3197,7 @@ function drawEventStrip(ctx, g, cfg, now) {
     const hugo = g.hugo, tier = g.hugoTier(), done = tier === 3;
     barPanel(ctx, 8, y, 344, h);
     drawCharacterFace(ctx, 12, y + 2, 38, h - 4, HUGO_SPEC, {mood: hugoMood(g)});
-    text(ctx, 'RUSH D’HUGO', 54, titleY, 11, C.creme, {weight:800,align:'left'});
+    text(ctx, 'VISITE CLIENT', 54, titleY, 11, C.creme, {weight:800,align:'left'});
     // v1.25 : la médaille déjà gagnée, et le palier suivant tant qu'on n'est pas à l'argent
     const detail = tier < 2 ? `${hugo.served} / ${hugo.target} · ${TIER_NAME[tier + 1]} à ${hugo.tiers[tier]}` : `${hugo.served} / ${hugo.target} boissons`;
     text(ctx, detail, 54, detailY, 12, done ? C.good : C.cremeD, {weight:800,align:'left'});
@@ -3200,22 +3206,22 @@ function drawEventStrip(ctx, g, cfg, now) {
   } else if (g.alexActive()) {
     barPanel(ctx, 8, y, 344, h);
     drawCharacterFace(ctx, 12, y + 2, 38, h - 4, ALEX_SPEC, {mood:'proud'});
-    text(ctx, `ALEX · POINTS ×${String(cfg.alexMult).replace('.', ',')}`, 54, titleY, 11, C.rose, {weight:800,align:'left'});
+    text(ctx, `MICHEL · POINTS ×${String(cfg.alexMult).replace('.', ',')}`, 54, titleY, 11, C.rose, {weight:800,align:'left'});
     if (cfg.alexMode === 'inversion') {
       for (const [a,b,x] of [['ipa','stout',65],['spritz','shot',159]]) {
         drawGlass(ctx,a,x,detailY + (compact ? 3 : 6),compact ? 0.48 : 0.62,1);
         drawUIIcon(ctx,'swap',x + 13,detailY - 12,compact ? 14 : 17);
         drawGlass(ctx,b,x + 43,detailY + (compact ? 3 : 6),compact ? 0.48 : 0.62,1);
       }
-    } else text(ctx, 'TIREUSES À L’ENVERS', 54, detailY, 10.5, C.cremeD, {weight:800,align:'left'});
+    } else text(ctx, 'POSTES À L’ENVERS', 54, detailY, 10.5, C.cremeD, {weight:800,align:'left'});
     drawEventTimer(ctx, g.alex.effectEnd - g.t, cfg.alexDuration, 278, timerY, timerH);
   } else if (g.jer.state === 'seat' && g.seats[g.jer.seat] && g.seats[g.jer.seat].isJer && g.seats[g.jer.seat].phase !== 'leave') {
     // v1.26 : Jérémie au comptoir. Ce qu'il veut, ce qu'on y gagne, et le temps qu'il nous laisse.
     const s = g.seats[g.jer.seat], mult = String(cfg.jeremieMult).replace('.', ',');
     barPanel(ctx, 8, y, 344, h);
     drawJeremieFace(ctx, 12, y + 2, 38, h - 4, jeremieMood(s));
-    text(ctx, s.tipsy ? 'JÉRÉMIE · IL REPASSE' : 'JÉRÉMIE · CONTRÔLE QUALITÉ', 54, titleY, 11, C.gold, {weight:800,align:'left'});
-    const detail = s.tipsy ? `Une IPA = points ×${mult} · ${cfg.jeremieBoost} clients` : `Zone dorée = points ×${mult} · ${cfg.jeremieBoost} clients`;
+    text(ctx, s.tipsy ? 'MARIE · ELLE REPASSE' : 'MARIE · CONTRÔLE QUALITÉ', 54, titleY, 11, C.gold, {weight:800,align:'left'});
+    const detail = s.tipsy ? `Un croissant = points ×${mult} · ${cfg.jeremieBoost} clients` : `Zone dorée = points ×${mult} · ${cfg.jeremieBoost} clients`;
     text(ctx, detail, 54, detailY, compact ? 10.5 : 11.5, C.cremeD, {weight:800,align:'left'});
     if (s.phase === 'wait' || s.phase === 'arrive') drawEventTimer(ctx, s.patience, s.pmax, 278, timerY, timerH);
   } else if (g.jer.boost > 0) {
@@ -3381,7 +3387,7 @@ function drawBanner(ctx, b) {
     ctx.restore();
   }
   if (b.sub) text(ctx, b.sub, 0, h - 17, 12.5, lit > 0 ? 'rgba(247,235,213,0.92)' : 'rgba(247,235,213,0.55)', { weight: 800 });
-  if (b.medal) drawMedal(ctx, b.medal, w / 2 - 30, -16, 40);   // v1.25 : médaille d'Hugo épinglée au coin de l'enseigne
+  if (b.medal) drawMedal(ctx, b.medal, w / 2 - 30, -16, 40);   // v1.25 : médaille d'Fabien épinglée au coin de l'enseigne
   ctx.restore();
   if (face) { // le visage arrive par la gauche, posé contre l'enseigne
     const k = ease.back(Math.min(1, Math.max(0, u - 0.1) / 0.3)), fw = 104, fh = 130;
@@ -3451,10 +3457,10 @@ function drawBell(ctx, ang, a = 1) {
 // Max réagit à droite, la règle est écrite sur l'ardoise qui passe devant eux comme le comptoir.
 // Une seule entrée animée (≈ 0,6 s), puis tout ressort par la droite.
 const CARD = {
-  alex: { name: 'ALEX', tag: 'Le shot de trop', tone: 'rose', band: ['#F39BB1', '#D7607F', '#9E3B58'], mood: 'proud', maxMood: 'tipsy', line: 'Allez, un petit !' },
-  hugo: { name: 'HUGO', tag: 'Le coup de pression', tone: 'orange', band: ['#5C93CF', '#2F5F99', '#1C3B63'], mood: 'focus', maxMood: 'panic', line: 'On accélère !' },
+  alex: { name: 'MICHEL', tag: 'La blague de trop', tone: 'rose', band: ['#F39BB1', '#D7607F', '#9E3B58'], mood: 'proud', maxMood: 'oops', line: 'Et là, le coach… ★#@!' },
+  hugo: { name: 'FABIEN', tag: 'La visite client', tone: 'orange', band: ['#5C93CF', '#2F5F99', '#1C3B63'], mood: 'focus', maxMood: 'panic', line: 'Visite client, on assure !' },
   // v1.26 : bande ambrée comme une IPA
-  jeremie: { name: 'JÉRÉMIE', tag: 'Le contrôle qualité', tone: 'blanc', band: ['#F7C66A', '#D9962E', '#9A6018'], mood: 'idle', maxMood: 'sweat', line: 'Contrôle qualité !' },
+  jeremie: { name: 'MARIE', tag: 'Le contrôle qualité', tone: 'blanc', band: ['#C98B5E', '#8E5A36', '#5A3520'], mood: 'idle', maxMood: 'sweat', line: 'Contrôle qualité !' },
 };
 const CARD_H = 470;   // du haut du nom au bas de l'ardoise
 function cardTop() { return Math.max(L.hudH + 6, Math.round((L.H - CARD_H - 40) * 0.5)); }
@@ -3540,16 +3546,16 @@ function drawCut(ctx, g, cfg, cut, now) {
     }
     text(ctx, `Points ×${mult} pendant ${cfg.alexDuration} secondes`, 180, sy + 131, 13, C.cremeD, { weight: 800 });
   } else if (alex) {
-    text(ctx, 'TIREUSES À L’ENVERS', 180, sy + 54, 34, C.creme, { pixel: true });
+    text(ctx, 'POSTES À L’ENVERS', 180, sy + 54, 34, C.creme, { pixel: true });
     text(ctx, 'Les bulles, elles, disent vrai.', 180, sy + 88, 15, C.creme, { weight: 800 });
     text(ctx, `Points ×${mult} pendant ${cfg.alexDuration} secondes`, 180, sy + 128, 13, C.cremeD, { weight: 800 });
   } else if (jer) { // v1.26 : la règle du contrôle qualité
     drawGlass(ctx, 'ipa', 46, sy + 66, 1.15, 1);
     drawUIIcon(ctx, 'star', 290, sy + 20, 36);
-    text(ctx, 'UNE IPA', 180, sy + 44, 34, C.creme, { pixel: true });
-    text(ctx, 'PARFAITE', 180, sy + 80, 34, C.gold, { pixel: true });
-    text(ctx, 'Tirée devant lui, dans la zone dorée.', 180, sy + 106, 14, C.creme, { weight: 800 });
-    text(ctx, `Approuvée : points ×${String(cfg.jeremieMult).replace('.', ',')} sur ${cfg.jeremieBoost} clients`, 180, sy + 131, 13, C.cremeD, { weight: 800 });
+    text(ctx, 'UN CHOCOLAT', 180, sy + 44, 34, C.creme, { pixel: true });
+    text(ctx, 'PARFAIT', 180, sy + 80, 34, C.gold, { pixel: true });
+    text(ctx, 'Versé devant elle, dans la zone dorée.', 180, sy + 106, 14, C.creme, { weight: 800 });
+    text(ctx, `Approuvé : points ×${String(cfg.jeremieMult).replace('.', ',')} sur ${cfg.jeremieBoost} clients`, 180, sy + 131, 13, C.cremeD, { weight: 800 });
   } else {
     const n = String(g.hugo.target);
     ctx.font = `400 92px ${FONT_P}`; const nw = ctx.measureText(n).width;
@@ -3716,10 +3722,10 @@ function coachText(g, cfg, st) {
   const many = g.trayMax() > 1;
   switch (st.kind) {
     case 'hold':
-      if (n === 'cancel') return { main: 'Garde le doigt appuyé', sub: 'le verre se remplit', tone: 'warn' };
+      if (n === 'cancel') return { main: 'Garde le doigt appuyé', sub: 'la tasse se remplit', tone: 'warn' };
       if (n === 'overflow') return { main: 'Trop plein !', sub: 'relâche plus tôt, dans le rose', tone: 'warn' };
       if (n === 'low' || g.tray.some((x) => x.q === 'low')) return { main: 'Pas assez remplie !', sub: 'maintiens pour la compléter', tone: 'warn' };
-      return { main: 'Maintiens ici', sub: 'le verre se remplit' };
+      return { main: 'Maintiens ici', sub: 'la tasse se remplit' };
     case 'release': {
       const f = g.st.ipa.fill;
       if (f >= cfg.perfectLo && f <= cfg.perfectHi) return { main: 'Relâche maintenant !', tone: 'rose' };
@@ -3727,14 +3733,14 @@ function coachText(g, cfg, st) {
       return { main: 'Garde le doigt appuyé', sub: 'lâche dans la zone rose' };
     }
     case 'tap':
-      return { main: 'Touche ici', sub: cfg.prep === 'simple' ? (many ? 'le verre va sur ton plateau' : 'Max prend le verre') : 'un toucher suffit' };
-    case 'stoutLaunch': return { main: 'Touche pour lancer la stout', sub: 'elle doit reposer un peu' };
-    case 'stoutRest': return { main: 'La stout repose…', sub: 'reviens la prendre quand elle est prête' };
+      return { main: 'Touche ici', sub: cfg.prep === 'simple' ? (many ? 'la commande va sur ton plateau' : 'Etienne prend la commande') : 'un toucher suffit' };
+    case 'stoutLaunch': return { main: 'Touche pour lancer le matcha', sub: 'elle doit reposer un peu' };
+    case 'stoutRest': return { main: 'Le matcha infuse…', sub: 'reviens la prendre quand elle est prête' };
     case 'stoutReady': return { main: 'Elle est prête !', sub: 'touche pour la prendre', tone: 'rose' };
     case 'serve':
       if (n === 'tapTray') return { main: 'Garde le doigt sur le plateau', sub: 'et glisse jusqu’au client', tone: 'warn' };
       if (n === 'miss') return { main: 'Lâche sur le client', sub: 'glisse jusqu’à lui', tone: 'warn' };
-      return { main: many ? 'Glisse le plateau vers le client' : 'Glisse le verre vers le client' };
+      return { main: many ? 'Glisse le plateau vers le client' : 'Glisse le plateau vers le client' };
     case 'drop': return { main: 'Lâche sur le client' };
   }
   return null;
@@ -4316,7 +4322,7 @@ function drawStory(info) {
   let y = ty + 56 + 30;
   const d = new Date(info.at || Date.now()), two = (n) => String(n).padStart(2, '0');
   ctx.font = `400 34px ${STORY_MONO}`; ctx.fillStyle = STORY_SOFT; ctx.textAlign = 'center';
-  ctx.fillText(storyStr(`Service du ${two(d.getDate())}/${two(d.getMonth() + 1)} · barman : Max`), cx, y);
+  ctx.fillText(storyStr(`Service du ${two(d.getDate())}/${two(d.getMonth() + 1)} · barista : Etienne`), cx, y);
   y += 34; storyDash(ctx, x0, x1, y);
   y += 64; ctx.font = `400 44px ${STORY_MONO}`; ctx.fillStyle = STORY_INK; storySpaced(ctx, 'L’ADDITION', cx, y, 7);
   for (const [k, v] of rows) { y += 58; storyLine(ctx, k, v, x0, x1, y, 42); }
@@ -4643,13 +4649,13 @@ function onEvent(e) {
       if (!s || !c.hints) break;
       if (s.tuto && !coachStep(g, c)) { // le coach montre déjà le geste : Max se tait
         const d = s.orders[0].drink, simple = c.prep === 'simple';
-        const line = d === 'ipa' ? (simple ? 'Touche l’IPA : elle va au plateau.' : 'IPA : maintiens, lâche dans le rose !')
-          : d === 'spritz' ? 'Un spritz : un toucher suffit.'
-            : (simple ? 'Une stout : un toucher aussi.' : 'Stout : lance-la, puis reviens !');
+        const line = d === 'ipa' ? (simple ? 'Touche le chocolat : il va au plateau.' : 'Chocolat : maintiens, lâche dans le rose !')
+          : d === 'spritz' ? 'Un expresso : un toucher suffit.'
+            : (simple ? 'Un matcha : un toucher aussi.' : 'Matcha : lance-le, puis reviens !');
         say(line, 3, true);
       } else if (s.dbl && !flags.hintDouble && g.trayMax() > 1) {
         flags.hintDouble = true;
-        say('Table de potes : deux verres !', 2.8, true);
+        say('Binôme de muscu : deux commandes !', 2.8, true);
       }
       break;
     }
@@ -4663,19 +4669,19 @@ function onEvent(e) {
       if (e.fill !== undefined) { // verdict du tirage, là où le joueur regardait
         const at = V.gaugeAt || { x: stationX(g, 'ipa').x, y: L.stTop - 40 };
         if (e.q === 'perfect') { Sfx.perfect(); floatText(at.x, at.y + 10, 'PARFAITE !', C.rose, 22, 1.1); setMood('proud', 0.8); }
-        else if (e.q === 'low') { Sfx.noGlass(); floatText(at.x, at.y + 10, 'PAS ASSEZ !', C.warn, 18, 1.1); setMood('oops', 0.8); if (Coach.learned.hold || !c.hints) say('Trop vide : remaintiens l’IPA !', 2, true); }
+        else if (e.q === 'low') { Sfx.noGlass(); floatText(at.x, at.y + 10, 'PAS ASSEZ !', C.warn, 18, 1.1); setMood('oops', 0.8); if (Coach.learned.hold || !c.hints) say('Trop vide : remaintiens le chocolat !', 2, true); }
         else floatText(at.x, at.y + 10, e.topUp ? 'COMPLÉTÉE' : 'BIEN', C.creme, 16, 0.8);
       }
       if (c.hints && !flags.hintPick && Coach.learned.serve && g.seats.some((s) => s && s.tuto)) {
         flags.hintPick = true;
-        say(max > 1 ? 'Glisse le plateau vers le client !' : 'Glisse le verre jusqu’au client !', 2.4, true);
+        say(max > 1 ? 'Glisse le plateau vers le client !' : 'Glisse le plateau jusqu’au client !', 2.4, true);
       }
       break;
     }
     case 'pullStart': Sfx.pullStart(); V.pullIn = false; if (e.topUp) say('On la complète…', 1, true); break;
-    case 'pullCancel': Sfx.pullStop(); if (c.hints && Coach.learned.hold) say('Garde le doigt appuyé pour tirer.', 1.4, true); break;
+    case 'pullCancel': Sfx.pullStop(); if (c.hints && Coach.learned.hold) say('Garde le doigt appuyé pour verser.', 1.4, true); break;
     case 'overflow': {
-      Sfx.pullStop(); Sfx.overflow(); setMood('oops', 0.8); say(pick(['Ça déborde !', 'Trop de mousse !']), 1, true);
+      Sfx.pullStop(); Sfx.overflow(); setMood('oops', 0.8); say(pick(['Ça déborde !', 'Ça déborde !']), 1, true);
       const at = V.gaugeAt || { x: stationX(g, 'ipa').x, y: L.stTop - 40 };
 
       break;
@@ -4705,12 +4711,12 @@ function onEvent(e) {
         V.flys.push({ kind: 'serve', seat: e.seat, drink: e.drinks[i], fill: e.fills ? e.fills[i] : 1, dx, x0: traySlotX(from.cx, k, max), y0: from.by - 2, x1: x + dx, y1: L.counterTop + 9, s0: 1.1, s1: 1, t: 0, dur: 0.15 });
       });
       floatText(x, seatTop(), '+' + e.pts, e.ev > 1 ? C.rose : C.creme, 17);
-      if (e.perfects) floatText(x, seatTop() + 24, 'PARFAITE', C.rose, 12, 0.9);
+      if (e.perfects) floatText(x, seatTop() + 24, 'PARFAIT', C.rose, 12, 0.9);
 
       V.max.bounce = 1;
       setMood(e.perfects ? 'proud' : 'happy', 0.5);
-      if (e.boost === 0) say('Fin du bonus du brasseur.', 1.3, true);
-      else if (Math.random() < 0.22) say(pick(['Et voilà !', 'Servi !', 'Suivant !', 'Santé !', 'Avec le sourire.']), 0.9);
+      if (e.boost === 0) say('Fin du bonus de Marie.', 1.3, true);
+      else if (Math.random() < 0.22) say(pick(['Et voilà !', 'Servi !', 'Suivant !', 'Bonne séance !', 'Avec le sourire.']), 0.9);
       break;
     }
     case 'comboLevel':
@@ -4733,26 +4739,30 @@ function onEvent(e) {
       floatText(L.seatX[e.seat], seatTop(), '−' + e.pen, C.bad, 17);
       setMood('sad', 1); say(pick(['Il est parti…', 'Reviens !', 'Ça fait mal.']), 1.1, true);
       break;
-    case 'noGlass': Sfx.noGlass(); say('Prends un verre d’abord !', 1, true); break;
+    case 'noGlass': Sfx.noGlass(); say('Prends une commande d’abord !', 1, true); break;
     case 'tooLow': // le client parle (bulle « Pas assez remplie ! ») ; Max dit comment réparer
       Sfx.noGlass(); Haptics.buzz(30); V.trayFlash = V.now;
       if (!e.partial) { setMood('oops', 0.9); V.max.shake = 0.6; }
-      say('Trop vide : remaintiens l’IPA !', 2.2, true);
+      say('Trop vide : remaintiens le chocolat !', 2.2, true);
       break;
     case 'swap': Sfx.swap(); break;
-    case 'alexTelegraph': Sfx.alexHey(); setMood('wary', 1.2); say('Oh non… Alex.', 1.1, true); break;
-    case 'alexOffer': Sfx.alexHey(); setMood('wary', 0.8); say('Alex t’offre un shot… points ×' + String(c.alexMult).replace('.', ',') + ' ?', 2, true); break;
-    case 'alexIgnored': say('Plus tard, Alex !', 1.2, true); break;
+    case 'alexTelegraph': Sfx.alexHey(); setMood('wary', 1.2); say('Oh non… Michel.', 1.1, true); break;
+    case 'alexOffer': Sfx.alexHey(); setMood('wary', 0.8); say('Michel a une blague… points ×' + String(c.alexMult).replace('.', ',') + ' ?', 2, true); break;
+    case 'alexIgnored': say('Plus tard, Michel !', 1.2, true); break;
     case 'alexCut':
       Sfx.gulp(); if (P.id !== null) onEnd();
       if (firstTime('alex_' + c.alexMode)) g.waitTap();
       break;
     case 'alexEffect':
       Sfx.hiccup();
-      say(c.alexMode === 'inversion' ? 'Sers l’inverse de la bulle…' : 'Les tireuses ont bougé !', 1.8, true);
+      say(c.alexMode === 'inversion' ? 'Malaise… sers l’inverse !' : 'Les postes ont bougé !', 1.8, true);
       break;
     case 'alexEnding': say('Ça passe…', 1.2, true); break;
-    case 'alexEnd': Sfx.ready(); setMood('happy', 0.8); say('Ça va mieux.', 1, true); break;
+    case 'alexEnd':   // Volta : bonus de Michel si aucune erreur pendant la blague
+      Sfx.ready(); setMood('happy', 0.8);
+      if (e.clean) { Sfx.coin(2); say(`Zéro faute malgré la blague : +${e.clean} !`, 2, true); floatText(160, L.maxTop - 34, '+' + e.clean, C.gold, 20); }
+      else say('Bon… on oublie cette blague.', 1.3, true);
+      break;
     case 'hugoCut':
       Sfx.hugoAlarm(); if (P.id !== null) onEnd();
       if (firstTime('hugo')) g.waitTap();
@@ -4765,50 +4775,50 @@ function onEvent(e) {
       break;
     case 'jeremieArrive': {
       const s = g.seats[e.seat];
-      if (e.tipsy) { Sfx.hiccup(); setMood('wary', 1); say('Encore lui ?', 1.3, true); if (s) talk(s, 'Je repasse… pour vérifier.', 2.2); }
+      if (e.tipsy) { Sfx.hiccup(); setMood('wary', 1); say('Encore elle ?', 1.3, true); if (s) talk(s, 'Fin de séance… j’ai faim !', 2.2); }
       break;   // premier passage : il parle à la fin du carton (jeremieGo)
     }
-    case 'jeremieGo': { const s = g.seats[e.seat]; say('Une IPA parfaite pour le brasseur !', 1.8, true); if (s) talk(s, 'Une IPA, s’il te plaît.', 2); break; }
+    case 'jeremieGo': { const s = g.seats[e.seat]; say('Un chocolat parfait pour Marie !', 1.8, true); if (s) talk(s, 'Un chocolat, s’il te plaît.', 2); break; }
     case 'jeremieTaste': {
       const s = g.seats[e.seat], from = V.serveFrom || { cx: TRAY.cx, by: trayHomeY() };
       V.flys.push({ kind: 'taste', seat: e.seat, drink: e.drink || 'ipa', fill: e.fill, x0: traySlotX(from.cx, e.slot, g.trayMax()), y0: from.by - 2, x1: L.seatX[e.seat] + 20, y1: L.custBase - 30, s0: 1.1, s1: 0.9, t: 0, dur: 0.18 });
       Sfx.gulp(); setMood('sweat', 1.3);
-      if (s) talk(s, s.tipsy ? 'Glou glou…' : 'Hmm…', 1.1);
+      if (s) talk(s, s.tipsy ? 'Miam…' : 'Hmm…', 1.1);
       break;
     }
     case 'jeremieApprove': {
       const s = g.seats[e.seat], mult = String(c.jeremieMult).replace('.', ',');
       Sfx.stamp(); Sfx.perfect(); Haptics.buzz(20);
       if (e.shot) { // v1.37 : pompette, on lui a servi un shot : p'tit bonus en plus du ×2
-        Sfx.coin(2); setMood('happy', 1.6); say(`Santé ! +${e.shot} et points ×${mult}`, 2.4, true);
-        if (s) { talk(s, 'Roh bon allez, p’tit bonus pour toi !', 2.8); floatText(L.seatX[e.seat], L.bubbleY + 12, '+' + e.shot, C.gold, 18, 1.2); }
+        Sfx.coin(2); setMood('happy', 1.6); say(`Un croissant ! +${e.shot} et points ×${mult}`, 2.4, true);
+        if (s) { talk(s, 'Un croissant ? Tu me connais trop bien !', 2.8); floatText(L.seatX[e.seat], L.bubbleY + 12, '+' + e.shot, C.gold, 18, 1.2); }
         break;
       }
       if (e.odd) { // v1.35 : pompette, il a validé une stout, un spritz ou une pinte à moitié vide
-        setMood('happy', 1.4); say(`Il n’a rien vu… points ×${mult} !`, 2.2, true);
-        if (s) talk(s, pick(({ stout: ['Une IPA… bien noire. J’adore.', 'Belle IPA. Très… stout.'], spritz: ['Une IPA orange ? Audacieux.', 'Notes d’agrumes… très marquées.'] })[e.drink] || ['Un peu courte… mais validé.', 'La moitié, c’est déjà ça.']), 2.4);
+        setMood('happy', 1.4); say(`Elle n’a rien vu… points ×${mult} !`, 2.2, true);
+        if (s) talk(s, pick(({ stout: ['Un chocolat… bien vert. J’adore.', 'Beau chocolat. Très… matcha.'], spritz: ['Un chocolat très serré ? Audacieux.', 'Notes de café… très marquées.'] })[e.drink] || ['Un peu court… mais validé.', 'La moitié, c’est déjà ça.']), 2.4);
         break;
       }
-      setMood('proud', 1.4); say(`Approuvée ! Points ×${mult} sur ${e.boost} clients`, 2.2, true);
-      if (s) talk(s, e.tipsy ? pick(['C’est… la meilleure bière du monde.', 'Je t’aime bien, toi.', 'Parfait. Tout est parfait.']) : pick(['Ça, c’est une pinte.', 'Rien à redire. Je valide.', 'Belle mousse. Approuvé.']), 2);
+      setMood('proud', 1.4); say(`Approuvé ! Points ×${mult} sur ${e.boost} clients`, 2.2, true);
+      if (s) talk(s, e.tipsy ? pick(['C’est… le meilleur chocolat du monde.', 'Je t’aime bien, toi.', 'Parfait. Tout est parfait.']) : pick(['Ça, c’est un chocolat.', 'Rien à redire. Je valide.', 'Bien onctueux. Approuvé.']), 2);
       break;
     }
     case 'jeremieReject': {
       const s = g.seats[e.seat];
       Sfx.stamp(); Sfx.fail(); Haptics.buzz(30);
-      if (e.last) { setMood('sad', 1.2); say('Il a noté…', 1.4, true); if (s) talk(s, 'Bon… je note.', 1.8); }
-      else { setMood('oops', 1); say('La zone dorée, la zone dorée…', 1.8, true); if (s) talk(s, pick(e.over ? ['Que de la mousse… À refaire.', 'Notes d’agrumes… et de mousse.'] : ['Trop juste. Encore une.', 'Notes d’agrumes… et de précipitation.']), 2); }
+      if (e.last) { setMood('sad', 1.2); say('Elle a noté…', 1.4, true); if (s) talk(s, 'Bon… je note.', 1.8); }
+      else { setMood('oops', 1); say('La zone dorée, la zone dorée…', 1.8, true); if (s) talk(s, pick(e.over ? ['Ça déborde… À refaire.', 'Notes de cacao… et de débordement.'] : ['Trop juste. Encore un.', 'Notes de cacao… et de précipitation.']), 2); }
       break;
     }
     case 'jeremieAgain': break;   // la bulle de commande revient : il en attend une autre
     case 'jeremieStale': { // v1.34 : la pinte a été tirée avant son arrivée
       const s = g.seats[e.seat];
       Sfx.noGlass(); Haptics.buzz(30); V.trayFlash = V.now; setMood('oops', 0.8);
-      say('Une fraîche, tirée devant lui !', 2, true);
-      if (s) talk(s, pick(['Elle traîne depuis quand, celle-là ?', 'Tire-la devant moi.', 'Une fraîche, s’il te plaît.']), 2);
+      say('Un chaud, versé devant elle !', 2, true);
+      if (s) talk(s, pick(['Il traîne depuis quand, celui-là ?', 'Verse-le devant moi.', 'Un bien chaud, s’il te plaît.']), 2);
       break;
     }
-    case 'jeremieWrong': { const s = g.seats[e.seat]; Sfx.wrong(); Haptics.buzz(30); setMood('oops', 0.8); if (s) talk(s, 'Une IPA, j’ai dit.', 1.6); break; }
+    case 'jeremieWrong': { const s = g.seats[e.seat]; Sfx.wrong(); Haptics.buzz(30); setMood('oops', 0.8); if (s) talk(s, 'Un chocolat, j’ai dit.', 1.6); break; }
     case 'jeremieVerdict':
       if (e.v === 'parti') { const s = g.seats[e.seat]; Sfx.left(); setMood('sad', 1); say('Raté pour le contrôle…', 1.4, true); if (s) talk(s, 'Je repasserai.', 1.6); }
       break;
@@ -4822,12 +4832,12 @@ function onEvent(e) {
       else if (e.tier === 3) { banner('OBJECTIF TENU !', med, 'blanc', 2, { face: hugoFace('proud'), medal: 3 }); Sfx.win(); setMood('proud', 1.2); }
       else if (e.tier === 2) { banner('PAS MAL !', med, 'blanc', 2, { face: hugoFace('idle'), medal: 2 }); Sfx.ready(); setMood('happy', 1); }
       else if (e.tier === 1) { banner('ÇA PASSE…', med, 'blanc', 2, { face: hugoFace('idle'), medal: 1 }); Sfx.ready(); setMood('oops', 1); }
-      else { banner('HUGO SOUPIRE…', `${e.served} / ${e.target} boissons`, 'faible', 2.1, { face: hugoFace('sad') }); Sfx.fail(); setMood('sad', 1.2); }
+      else { banner('FABIEN SOUPIRE…', `${e.served} / ${e.target} boissons`, 'faible', 2.1, { face: hugoFace('sad') }); Sfx.fail(); setMood('sad', 1.2); }
       break;
     case 'pace': { // palier de difficulté : Max le sent passer (sauf pendant Alex et Hugo, qui parlent déjà)
       if (g.eventBusy()) break;
-      const lines = ['', 'Ça se remplit !', 'Ça accélère !', 'Coup de feu !', 'Ça ne s’arrête plus !', 'Plein service !'];
-      say(e.doubles ? 'Les tables de potes arrivent !' : lines[e.level] || 'Ça accélère !', 1.4);
+      const lines = ['', 'Ça se remplit !', 'Ça accélère !', 'L’heure de pointe !', 'Ça ne s’arrête plus !', 'Plein service !'];
+      say(e.doubles ? 'Les binômes de muscu arrivent !' : lines[e.level] || 'Ça accélère !', 1.4);
       break;
     }
     case 'lastCall': Sfx.bell(); banner('DERNIÈRE COMMANDE !', 'plus personne n’entre', 'orange', 2.3, { bell: true }); break;
@@ -4874,7 +4884,7 @@ function gameOver() {
     v: 2, at: new Date().toISOString(), score: g.score, prep: cfg.prep, trayMax: cfg.trayMax, alexMode: cfg.alexMode, alexShot: cfg.alexShot,
     alexOn: cfg.alexOn, hugoOn: cfg.hugoOn, duration: cfg.duration, drinks: s.drinks, errors: s.errors, left: s.left,
     perfect: s.perfect, combo: g.bestCombo, hugo: s.hugoPlayed ? `${s.hugoServed}/${s.hugoTarget}` : null,
-    hugoOk: s.hugoReached, hugoPerfect: s.hugoPerfect, hugoTier: s.hugoTier, alexPasses: s.alexPasses, alexErrors: s.alexErrors,
+    hugoOk: s.hugoReached, hugoPerfect: s.hugoPerfect, hugoTier: s.hugoTier, alexPasses: s.alexPasses, alexErrors: s.alexErrors, alexClean: s.alexClean || 0,
     alexIgnored: s.alexIgnored, rating: null, difficulty: cfg.difficulty, refused: s.refused, low: s.low, learnPause: Math.round(s.learnPause),
     menu: g.menu, jeremie: s.jeremieVerdicts.slice(),
   };
@@ -4973,9 +4983,9 @@ function showScreen(id) {
 function modeLabel(c) {
   const prep = c.prep === 'simple' ? 'Service simple' : 'Service avec tirage';
   const tray = (c.trayMax || 1) > 1 ? `Plateau de ${c.trayMax}` : 'Un verre à la fois';
-  const alex = !c.alexOn ? 'sans Alex' : `Alex : ${c.alexMode === 'miroir' ? 'tireuses à l’envers' : 'commandes inversées'}, ${c.alexShot === 'impose' ? 'imposé' : 'au choix'}`;
-  const hugo = c.hugoOn ? 'Hugo' : 'sans Hugo';
-  const jer = !c.jeremieOn ? 'sans Jérémie' : c.menu === 'hasard' ? 'Jérémie (menu au hasard)' : ({ alex: 'menu Alex', jeremie: 'menu Jérémie', tous: 'menu complet' })[c.menu];
+  const alex = !c.alexOn ? 'sans Michel' : `Michel : ${c.alexMode === 'miroir' ? 'tireuses à l’envers' : 'commandes inversées'}, ${c.alexShot === 'impose' ? 'imposé' : 'au choix'}`;
+  const hugo = c.hugoOn ? 'Fabien' : 'sans Fabien';
+  const jer = !c.jeremieOn ? 'sans Marie' : c.menu === 'hasard' ? 'Marie (menu au hasard)' : ({ alex: 'menu Michel', jeremie: 'menu Marie', tous: 'menu complet' })[c.menu];
   return [prep, tray, alex, hugo, jer];
 }
 function fillTitle() {
@@ -4986,7 +4996,7 @@ function fillTitle() {
     : 'Pas encore de record';
   $('tStep2').textContent = tray ? 'le plateau' : 'le verre';
   const dur = c.duration || 120;   // v1.17 : Max ne dévoile plus la montée par paliers, le joueur la découvre en jouant
-  $('tSay').textContent = `${dur >= 120 ? 'Deux minutes' : dur + ' secondes'} de service. Le bar va vite se remplir !`;
+  $('tSay').textContent = `${dur >= 120 ? 'Deux minutes' : dur + ' secondes'} de service. Le comptoir va vite se remplir !`;
   // v1.24 : arrivé par un lien de défi, Max annonce le score à battre (à la place du n° 1 de la semaine)
   if (DEFI) {
     const who = DEFI.de || 'Un pote';
@@ -5013,19 +5023,19 @@ function fillEnd(e, rec) {
   $('eScore').textContent = e.score.toLocaleString('fr-FR');
   $('eRecord').hidden = !rec;
   const d = new Date(e.at || Date.now()), two = (n) => String(n).padStart(2, '0');
-  $('eMeta').textContent = `Service du ${two(d.getDate())}/${two(d.getMonth() + 1)} à ${two(d.getHours())}h${two(d.getMinutes())} · barman : Max`;
+  $('eMeta').textContent = `Service du ${two(d.getDate())}/${two(d.getMonth() + 1)} à ${two(d.getHours())}h${two(d.getMinutes())} · barista : Etienne`;
   const rows = [
     ['Boissons servies', e.drinks],
-    ...(e.prep === 'tirage' ? [['Pintes parfaites', e.perfect]] : []),
-    ...(e.refused ? [['IPA trop vides', e.refused]] : []),
+    ...(e.prep === 'tirage' ? [['Chocolats parfaits', e.perfect]] : []),
+    ...(e.refused ? [['Chocolats trop vides', e.refused]] : []),
     ['Erreurs', e.errors],
     ['Clients partis', e.left],
     ['Meilleur combo', e.combo],
   ];
-  if (e.hugo) rows.push(['Rush d’Hugo', `${e.hugo} ${e.hugoPerfect ? 'or, 0 faute' : ['raté', 'bronze', 'argent', 'or'][e.hugoTier || 0]}`]);
+  if (e.hugo) rows.push(['Visite client', `${e.hugo} ${e.hugoPerfect ? 'or, 0 faute' : ['raté', 'bronze', 'argent', 'or'][e.hugoTier || 0]}`]);
   // v1.26 : le verdict du brasseur, passage par passage
-  if (e.jeremie && e.jeremie.length) rows.push(['Jérémie', e.jeremie.map((v) => ({ approuve: 'approuvé', pompette: 'pompette', shot: 'trinqué +' + (cfg.jeremieShotBonus || 0), revoir: 'à revoir', parti: 'raté' })[v] || v).join(', ')]);
-  if (e.alexOn && e.alexPasses) rows.push(['Shot d’Alex', e.alexIgnored && e.alexIgnored >= e.alexPasses ? 'refusé' : `${e.alexErrors} erreur${e.alexErrors > 1 ? 's' : ''}`]);
+  if (e.jeremie && e.jeremie.length) rows.push(['Marie', e.jeremie.map((v) => ({ approuve: 'approuvé', pompette: 'affamée', shot: 'croissant +' + (cfg.jeremieShotBonus || 0), revoir: 'à revoir', parti: 'raté' })[v] || v).join(', ')]);
+  if (e.alexOn && e.alexPasses) rows.push(['Blague de Michel', e.alexIgnored && e.alexIgnored >= e.alexPasses ? 'refusée' : e.alexClean ? `zéro faute +${e.alexClean}` : `${e.alexErrors} erreur${e.alexErrors > 1 ? 's' : ''}`]);
   $('eStats').innerHTML = rows.map(([k, v]) => `<div class="r-line"><dt>${k}</dt><dd>${v}</dd></div>`).join('');
   // v1.39 : les caractéristiques de la partie ne servent qu'aux testeurs (en public, les règles sont toujours celles par défaut)
   $('eModes').textContent = TEST ? modeLabel(cfg).join(' · ') : '';
@@ -5065,9 +5075,9 @@ function instaTapped() {
 // Sans partage d'image (ordinateur, page claude.ai, vieux navigateur) : l'image s'affiche, appui long pour l'enregistrer.
 function storyInfo(e) {
   const rows = [['Boissons servies', e.drinks]];
-  if (e.prep === 'tirage') rows.push(['Pintes parfaites', e.perfect]);
+  if (e.prep === 'tirage') rows.push(['Chocolats parfaits', e.perfect]);
   rows.push(['Meilleur combo', e.combo]);
-  if (e.hugo) rows.push(['Rush d’Hugo', `${e.hugo} ${e.hugoPerfect ? 'or' : ['raté', 'bronze', 'argent', 'or'][e.hugoTier || 0]}`]);
+  if (e.hugo) rows.push(['Visite client', `${e.hugo} ${e.hugoPerfect ? 'or' : ['raté', 'bronze', 'argent', 'or'][e.hugoTier || 0]}`]);
   const rank = [], r = Rank.end && Rank.end.sent && Rank.last;   // classement de cette partie, s'il est connu
   if (r && r.record) rank.push(r.rang === 1 ? '1er de la semaine !' : `${rankOrd(r.rang)} de la semaine`);
   const t = r && r.tout;
@@ -5205,7 +5215,7 @@ $('bPausePanel').addEventListener('click', () => openPanel('sPause'));
 $('bPause').addEventListener('click', () => pause());
 $('bMute').addEventListener('click', () => { settings.sound = !settings.sound; cfg.sound = settings.sound; Sfx.on = settings.sound; saveSettings(); updateMuteIcon(); });
 $('bTestA').addEventListener('click', () => { if (!g) return; if (g.forceAlex()) drain(); else say('Un événement à la fois !', 1.2, true); });
-$('bTestH').addEventListener('click', () => { if (!g) return; if (g.forceHugo()) drain(); else say(g.t > cfg.duration - 26 ? 'Trop tard pour Hugo.' : 'Un événement à la fois !', 1.2, true); });
+$('bTestH').addEventListener('click', () => { if (!g) return; if (g.forceHugo()) drain(); else say(g.t > cfg.duration - 26 ? 'Trop tard pour Fabien.' : 'Un événement à la fois !', 1.2, true); });
 $('bTestJ').addEventListener('click', () => { if (!g) return; if (g.forceJeremie()) drain(); else say('Un événement à la fois !', 1.2, true); });
 function updateMuteIcon() { $('bMute').setAttribute('aria-pressed', String(!settings.sound)); $('bMute').title = settings.sound ? 'Couper le son' : 'Remettre le son'; }
 
@@ -5213,43 +5223,43 @@ function updateMuteIcon() { $('bMute').setAttribute('aria-pressed', String(!sett
 const fmtN = (x) => String(x).replace('.', ',');
 const PANEL = [
   { section: 'Mécaniques à comparer', note: 'Change un réglage, joue deux ou trois parties, note ton ressenti à la fin. L’historique en bas garde la trace.' },
-  { key: 'prep', label: 'Préparation des boissons', type: 'seg', options: [['simple', 'Simple'], ['tirage', 'Tirage']], help: { simple: 'Toutes les boissons au toucher. Pur arcade.', tirage: 'IPA au maintien (pinte parfaite = bonus), stout lancée puis reprise.' } },
-  { key: 'trayMax', label: 'Plateau de Max', type: 'seg', options: [[1, '1 verre'], [2, '2 verres'], [3, '3 verres']], help: { 1: 'Un verre à la fois, comme la version 1.', 2: 'Juste assez pour une commande double.', 3: 'De quoi servir plusieurs clients d’affilée.' } },
-  { key: 'alexMode', label: 'Effet d’Alex', type: 'seg', options: [['inversion', 'Commandes inversées'], ['miroir', 'Tireuses à l’envers']], help: { miroir: 'Les tireuses échangent leurs places. Les bulles restent vraies.', inversion: 'Les bulles se retournent : IPA ⇄ stout, spritz ⇄ shot.' } },
-  { key: 'alexShot', label: 'Le shot d’Alex', type: 'seg', options: [['choix', 'Au choix'], ['impose', 'Imposé']], help: { impose: 'Alex débarque et fait boire Max, sans demander.', choix: 'Alex s’installe avec son plateau : touche-le pour trinquer, ou ignore-le.' } },
-  { key: 'alexMult', label: 'Points pendant Alex', type: 'seg', options: [[1, '×1'], [1.5, '×1,5'], [2, '×2']] },
-  { key: 'alexOn', label: 'Alex', type: 'toggle' },
-  { key: 'hugoOn', label: 'Hugo', type: 'toggle' },
-  { key: 'jeremieOn', label: 'Jérémie (contrôle qualité)', type: 'toggle' },
-  { key: 'menu', label: 'Événements de la partie', type: 'seg', options: [['hasard', 'Au hasard'], ['alex', 'Alex'], ['jeremie', 'Jérémie'], ['tous', 'Les trois']], help: { hasard: 'Hugo à chaque partie, plus Alex ou Jérémie (une chance sur deux). Jamais les trois.', alex: 'Alex et Hugo, comme avant.', jeremie: 'Jérémie passe deux fois (la seconde, pompette) et Hugo. Pas d’Alex.', tous: 'Pour tester seulement : Jérémie tôt, puis Alex, puis Hugo. Le hasard ne le tire jamais.' } },
+  { key: 'prep', label: 'Préparation des boissons', type: 'seg', options: [['simple', 'Simple'], ['tirage', 'Tirage']], help: { simple: 'Toutes les boissons au toucher. Pur arcade.', tirage: 'Chocolat au maintien (parfait = bonus), matcha lancé puis repris.' } },
+  { key: 'trayMax', label: 'Plateau de Etienne', type: 'seg', options: [[1, '1 verre'], [2, '2 verres'], [3, '3 verres']], help: { 1: 'Un verre à la fois, comme la version 1.', 2: 'Juste assez pour une commande double.', 3: 'De quoi servir plusieurs clients d’affilée.' } },
+  { key: 'alexMode', label: 'Effet de Michel', type: 'seg', options: [['inversion', 'Commandes inversées'], ['miroir', 'Tireuses à l’envers']], help: { miroir: 'Les postes échangent leurs places. Les bulles restent vraies.', inversion: 'Les bulles se retournent : chocolat ⇄ matcha, expresso ⇄ croissant.' } },
+  { key: 'alexShot', label: 'La blague de Michel', type: 'seg', options: [['choix', 'Au choix'], ['impose', 'Imposé']], help: { impose: 'Michel débarque et fait boire Etienne, sans demander.', choix: 'Michel s’installe avec son plateau : touche-le pour trinquer, ou ignore-le.' } },
+  { key: 'alexMult', label: 'Points pendant Michel', type: 'seg', options: [[1, '×1'], [1.5, '×1,5'], [2, '×2']] },
+  { key: 'alexOn', label: 'Michel', type: 'toggle' },
+  { key: 'hugoOn', label: 'Fabien', type: 'toggle' },
+  { key: 'jeremieOn', label: 'Marie (contrôle qualité)', type: 'toggle' },
+  { key: 'menu', label: 'Événements de la partie', type: 'seg', options: [['hasard', 'Au hasard'], ['alex', 'Michel'], ['jeremie', 'Marie'], ['tous', 'Les trois']], help: { hasard: 'Fabien à chaque partie, plus Michel ou Marie (une chance sur deux). Jamais les trois.', alex: 'Michel et Fabien, comme avant.', jeremie: 'Marie passe deux fois (la seconde, pompette) et Fabien. Pas de Michel.', tous: 'Pour tester seulement : Marie tôt, puis Michel, puis Fabien. Le hasard ne le tire jamais.' } },
   { section: 'Rythme' },
   { key: 'duration', label: 'Durée de partie', type: 'seg', options: [[90, '90 s'], [120, '120 s']] },
   { key: 'difficulty', label: 'Cadence des clients', type: 'range', min: 0.6, max: 1.6, step: 0.05, fmt: (x) => '×' + fmtN(x) },
   { key: 'patienceMult', label: 'Patience des clients', type: 'range', min: 0.6, max: 1.6, step: 0.05, fmt: (x) => '×' + fmtN(x) },
   { key: 'stepEvery', label: 'Difficulté : un palier de plus toutes les', type: 'range', min: 10, max: 30, step: 5, fmt: (x) => x + ' s' },
-  { key: 'pullFull', label: 'Temps pour remplir une IPA', type: 'range', min: 0.4, max: 1.0, step: 0.02, fmt: (x) => fmtN(x.toFixed(2)) + ' s' },
-  { key: 'goodLo', label: 'IPA : niveau minimum accepté', type: 'range', min: 0.4, max: 0.8, step: 0.02, fmt: (x) => Math.round(x * 100) + ' %' },
-  { key: 'stoutRest', label: 'Repos de la stout', type: 'range', min: 0.8, max: 3, step: 0.1, fmt: (x) => fmtN(x.toFixed(1)) + ' s' },
-  { key: 'alexDuration', label: 'Durée de l’effet d’Alex', type: 'range', min: 6, max: 20, step: 1, fmt: (x) => x + ' s' },
-  { key: 'hugoDuration', label: 'Durée du rush d’Hugo', type: 'range', min: 10, max: 30, step: 1, fmt: (x) => x + ' s' },
-  { key: 'hugoTargetTirage', label: 'Objectif d’Hugo, tirage', type: 'range', min: 6, max: 20, step: 1, fmt: (x) => x + ' boissons' },
-  { key: 'hugoTargetSimple', label: 'Objectif d’Hugo, simple', type: 'range', min: 6, max: 24, step: 1, fmt: (x) => x + ' boissons' },
+  { key: 'pullFull', label: 'Temps pour remplir un chocolat', type: 'range', min: 0.4, max: 1.0, step: 0.02, fmt: (x) => fmtN(x.toFixed(2)) + ' s' },
+  { key: 'goodLo', label: 'Chocolat : niveau minimum accepté', type: 'range', min: 0.4, max: 0.8, step: 0.02, fmt: (x) => Math.round(x * 100) + ' %' },
+  { key: 'stoutRest', label: 'Infusion du matcha', type: 'range', min: 0.8, max: 3, step: 0.1, fmt: (x) => fmtN(x.toFixed(1)) + ' s' },
+  { key: 'alexDuration', label: 'Durée de l’effet de Michel', type: 'range', min: 6, max: 20, step: 1, fmt: (x) => x + ' s' },
+  { key: 'hugoDuration', label: 'Durée du rush de Fabien', type: 'range', min: 10, max: 30, step: 1, fmt: (x) => x + ' s' },
+  { key: 'hugoTargetTirage', label: 'Objectif de Fabien, tirage', type: 'range', min: 6, max: 20, step: 1, fmt: (x) => x + ' boissons' },
+  { key: 'hugoTargetSimple', label: 'Objectif de Fabien, simple', type: 'range', min: 6, max: 24, step: 1, fmt: (x) => x + ' boissons' },
   { key: 'doubles', label: 'Commandes doubles (tables de potes)', type: 'toggle' },
-  { section: 'Scènes d’Alex et Hugo' },
+  { section: 'Scènes de Michel et Fabien' },
   { key: 'explain', label: 'La première fois, attendre un toucher pour lire la règle', type: 'toggle' },
-  { key: 'cutAlex', label: 'Durée de la scène d’Alex ensuite', type: 'range', min: 1.5, max: 5, step: 0.1, fmt: (x) => fmtN(x.toFixed(1)) + ' s' },
-  { key: 'cutHugo', label: 'Durée de la scène d’Hugo ensuite', type: 'range', min: 1.5, max: 5, step: 0.1, fmt: (x) => fmtN(x.toFixed(1)) + ' s' },
+  { key: 'cutAlex', label: 'Durée de la scène de Michel ensuite', type: 'range', min: 1.5, max: 5, step: 0.1, fmt: (x) => fmtN(x.toFixed(1)) + ' s' },
+  { key: 'cutHugo', label: 'Durée de la scène de Fabien ensuite', type: 'range', min: 1.5, max: 5, step: 0.1, fmt: (x) => fmtN(x.toFixed(1)) + ' s' },
   { type: 'action', label: 'Revoir les explications', done: 'Le guidage du premier service et les scènes reviendront à la prochaine partie.', run: () => { seen = {}; store.set('seen2', seen); Coach.learned = {}; store.set('learn1', Coach.learned); } },
   // v1.41 : le néon Instagram ne revient plus une fois touché (v1.39) ; ce bouton le fait revenir sur ce téléphone, pour tester ou le montrer
   { type: 'action', label: 'Revoir le néon Instagram', done: 'Le néon « Suis-nous sur Insta » reviendra sur la prochaine addition.', run: () => { store.set('insta', 0); } },
   { section: 'Confort' },
   { key: 'sound', label: 'Son', type: 'toggle' },
   { key: 'haptics', label: 'Vibrations (Android)', type: 'toggle' },
-  { key: 'sway', label: 'Tangage pendant Alex', type: 'toggle' },
+  { key: 'sway', label: 'Tangage pendant Michel', type: 'toggle' },
   { key: 'hints', label: 'Guidage des premiers gestes', type: 'toggle' },
   { section: 'Outils de test' },
   { key: 'showZones', label: 'Afficher les zones tactiles', type: 'toggle' },
-  { key: 'testButtons', label: 'Boutons A, H et J en jeu (déclencher Alex, Hugo, Jérémie)', type: 'toggle' },
+  { key: 'testButtons', label: 'Boutons A, H et J en jeu (déclencher Michel, Fabien, Marie)', type: 'toggle' },
   { key: 'slowmo', label: 'Vitesse', type: 'seg', options: [[1, 'Normale'], [0.6, 'Ralenti']] },
   { key: 'seed', label: 'Clients', type: 'seg', options: [[0, 'Aléatoires'], [4242, 'Toujours les mêmes']], help: { 0: 'Chaque partie est différente.', 4242: 'Même partie à chaque fois : idéal pour comparer deux réglages.' } },
 ];
@@ -5332,13 +5342,13 @@ $('pSimRun').addEventListener('click', () => {
       ['Boissons servies', (s) => n1(s.drinks)],
       ['Clients partis', (s) => n1(s.left)],
       ['Erreurs', (s) => n1(s.errors)],
-      ['Pintes parfaites', (s) => n1(s.perfect)],
-      ['Hugo : boissons en moyenne', (s) => settings.hugoOn ? `${n1(s.hugoServed)} / ${s.hugoTarget}` : '—'],
-      ['Hugo : argent ou mieux', (s) => settings.hugoOn ? pct(s.hugoArgent) : '—'],
-      ['Hugo : or (la demande)', (s) => settings.hugoOn ? pct(s.hugoReached) : '—'],
-      ['Hugo : service impeccable', (s) => settings.hugoOn ? pct(s.hugoPerfect) : '—'],
+      ['Chocolats parfaits', (s) => n1(s.perfect)],
+      ['Fabien : boissons en moyenne', (s) => settings.hugoOn ? `${n1(s.hugoServed)} / ${s.hugoTarget}` : '—'],
+      ['Fabien : argent ou mieux', (s) => settings.hugoOn ? pct(s.hugoArgent) : '—'],
+      ['Fabien : or (la demande)', (s) => settings.hugoOn ? pct(s.hugoReached) : '—'],
+      ['Fabien : service impeccable', (s) => settings.hugoOn ? pct(s.hugoPerfect) : '—'],
     ];
-    out.innerHTML = `<div class="tbl"><table><thead><tr><th>${BOT_PROFILES[prof].label}, ${N} parties</th><th>Simple</th><th>Tirage</th></tr></thead><tbody>${rows.map(([k, f]) => `<tr><th>${k}</th><td>${f(res.simple)}</td><td>${f(res.tirage)}</td></tr>`).join('')}</tbody></table></div><p class="note">Le bot lit parfaitement les bulles : un humain fera moins bien, surtout pendant Alex. Ces chiffres servent à caler les objectifs, pas à juger le plaisir.</p>`;
+    out.innerHTML = `<div class="tbl"><table><thead><tr><th>${BOT_PROFILES[prof].label}, ${N} parties</th><th>Simple</th><th>Tirage</th></tr></thead><tbody>${rows.map(([k, f]) => `<tr><th>${k}</th><td>${f(res.simple)}</td><td>${f(res.tirage)}</td></tr>`).join('')}</tbody></table></div><p class="note">Le bot lit parfaitement les bulles : un humain fera moins bien, surtout pendant Michel. Ces chiffres servent à caler les objectifs, pas à juger le plaisir.</p>`;
     simBusy = false;
   };
   setTimeout(tick, 20);
@@ -5352,8 +5362,8 @@ function renderHistory() {
   const box = $('pHist');
   if (!history.length) { box.innerHTML = '<p class="note">Aucune partie jouée pour l’instant.</p>'; return; }
   const rate = { bof: 'Bof', bien: 'Bien', top: 'Top' };
-  box.innerHTML = `<div class="tbl"><table><thead><tr><th>Réglage</th><th>Score</th><th>Hugo</th><th>Ressenti</th></tr></thead><tbody>${history.slice(0, 15).map((h) => {
-    const alex = !h.alexOn ? 'sans Alex' : `${h.alexMode === 'miroir' ? 'miroir' : 'inversion'} ${h.alexShot === 'impose' ? 'imposé' : 'choix'}`;
+  box.innerHTML = `<div class="tbl"><table><thead><tr><th>Réglage</th><th>Score</th><th>Fabien</th><th>Ressenti</th></tr></thead><tbody>${history.slice(0, 15).map((h) => {
+    const alex = !h.alexOn ? 'sans Michel' : `${h.alexMode === 'miroir' ? 'miroir' : 'inversion'} ${h.alexShot === 'impose' ? 'imposé' : 'choix'}`;
     const tray = (h.trayMax || 1) > 1 ? `plateau ${h.trayMax}` : '1 verre';
     return `<tr><th>${h.prep === 'simple' ? 'Simple' : 'Tirage'} · ${tray} · ${alex}</th><td>${h.score.toLocaleString('fr-FR')}</td><td>${h.hugo ? h.hugo + (h.hugoOk ? ' ✓' : '') : '—'}</td><td>${h.rating ? rate[h.rating] : '—'}</td></tr>`;
   }).join('')}</tbody></table></div>`;
