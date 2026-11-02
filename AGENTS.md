@@ -24,4 +24,4 @@ Avant d'enregistrer : `node build.mjs`, `node test/sim.mjs 50`, `node test/rejeu
 ## Publier
 - Cloudflare : Worker `volta` (nom identique dans `wrangler.jsonc`), branché sur ce dépôt par Workers Builds (Jérémie le branche dans le tableau de bord) ; adresse prévue https://volta.jeremie-normand.workers.dev. Chaque enregistrement sur `main` met en ligne.
 - Classement : base D1 `volta-scores` à créer par Jérémie, puis décommenter la liaison dans `wrangler.jsonc` avec son identifiant. Sans elle, le jeu marche et le classement se cache.
-- Page de test claude.ai de Volta : https://claude.ai/artifact/… (à renseigner au premier envoi). Jamais l'artifact de Galopins.
+- Page de test claude.ai de Volta : https://claude.ai/artifact/NXu5bxmxdXEdf9PmLZsY44 (republier `dist/galopins-arcade.html` sur cette URL, paramètre `url`). Jamais l'artifact de Galopins.
