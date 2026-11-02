@@ -108,20 +108,20 @@ function drawIllustratedGlass(ctx, d, cx, by, s, fill, opt) {
   else {
     draw(1);
     if (f > 0) {
-      const base = d === 'stout' ? -7 : d === 'spritz' ? -13 : d === 'shot' ? -3 : -2;
-      const top = d === 'shot' ? -16 : d === 'spritz' ? -31 : -29;
+      // Volta : repères mesurés par tools/pack-boissons.py (chocolat dans la tasse en verre, tasse d'expresso, croissant)
+      const base = d === 'stout' ? -7 : d === 'spritz' ? -5 : d === 'shot' ? -4 : -1;
+      const top = d === 'shot' ? -15 : d === 'spritz' ? -14 : -28;
       const level = base - (base - top) * f;
       ctx.save(); ctx.beginPath(); ctx.rect(-24, level, 48, 44 - level); ctx.clip(); draw(0); ctx.restore();
-      if (d === 'ipa' || d === 'stout') {
-        ctx.save(); glassPath(ctx, d); ctx.clip();
-        ctx.fillStyle = d === 'ipa' ? '#F7E7BD' : '#DAC393';
-        ctx.beginPath(); ctx.ellipse(0, level + 1, d === 'ipa' ? 10 : 11, 1.8, 0, 0, 7); ctx.fill(); ctx.restore();
+      if (d === 'ipa') {   // Volta : surface du chocolat dans la tasse (corps de la tasse centré à −4,3, l'anse à droite)
+        ctx.fillStyle = '#B98560';
+        ctx.beginPath(); ctx.ellipse(-4.3, level + 1, 8, 1.6, 0, 0, 7); ctx.fill();
       }
     }
   }
   if (opt.foamOver > 0 && d === 'ipa') {
-    ctx.fillStyle = C.creme; ctx.beginPath(); ctx.ellipse(0,-31,11,2+opt.foamOver*3,0,0,7); ctx.fill();
-    ctx.fillRect(7,-31,2,4+opt.foamOver*8);
+    ctx.fillStyle = '#7A4528'; ctx.beginPath(); ctx.ellipse(-4.3,-29,10,2+opt.foamOver*3,0,0,7); ctx.fill();   // Volta : le chocolat déborde
+    ctx.fillRect(3,-29,2,4+opt.foamOver*8);
   }
   ctx.restore(); return true;
 }

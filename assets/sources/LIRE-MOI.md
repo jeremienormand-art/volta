@@ -23,7 +23,8 @@ Outil : `python3 tools/pack-chatgpt.py` (équipe, accueil, cartons et décors ci
 - `ardoise.png` — ardoise encadrée (pause, top, cartons).
 - `ardoise-stations.png` (v1.46) — grain de l'ardoise des stations (l'ancienne `station-slate.webp`), base de `tools/pack-slate.py`.
 - `craie.png` — chope, étoile, flèche, cœur à la craie (plus utilisée depuis la v1.45, découpe désactivée).
-- `stout-etapes.png` — stout en 6 étapes (`tools/pack-stout.py`).
+- `boissons-volta.png` (Volta) — chocolat, matcha, expresso, croissant ; ligne du haut vide, du bas pleine (`tools/pack-boissons.py` → `assets/drinks/drinks.webp`).
+- `matcha-etapes.png` (Volta) — matcha en 6 étapes, dans la colonne de la stout (`tools/pack-stout.py` → `assets/drinks/stout-steps.webp`).
 - `classement.png` — médailles, trophée, couronne et lauriers (`tools/pack-rank.py`).
 - `salle-profonde.png` — salle du bar (redimensionnée et floutée avec Pillow, voir AGENTS.md).
 - `apercu.png` — image d'aperçu des liens partagés, paysage 3:2 sans texte (`tools/pack-apercu.py` → `dist/apercu.jpg`).
