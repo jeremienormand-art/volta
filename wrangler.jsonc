@@ -1,0 +1,20 @@
+// Mise en ligne sur Cloudflare (Workers avec fichiers statiques).
+// Le dépôt est branché sur Cloudflare : chaque enregistrement sur `main` publie le jeu.
+// « name » doit rester identique au nom du Worker dans le tableau de bord Cloudflare.
+// Tout ce qui est dans `dist/` est public : n'y mettre que le jeu.
+{
+  "name": "volta",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  },
+  // Classement : à brancher quand la base `volta-scores` existe (Jérémie la crée dans le tableau de bord Cloudflare,
+  // puis colle ici son identifiant). Sans elle, le jeu marche et le classement reste caché.
+  // "d1_databases": [{ "binding": "DB", "database_name": "volta-scores", "database_id": "…" }],
+  // v1.30 : anti-triche. « observer » : chaque partie classée est rejouée après la réponse et notée (bilan : /api/rejeu) ;
+  // « exiger » : score refusé si le rejeu ne donne pas le même ; « off » : pas de rejeu.
+  "vars": { "REJEU": "observer" },
+  "observability": { "enabled": true }
+}

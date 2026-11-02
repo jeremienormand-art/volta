@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Page complete pour Cloudflare (qui n'indique pas l'encodage) ; sur claude.ai, ces lignes sont sans effet. -->
+<title>{{jeu}}</title>
+<!-- v1.31 : icône (Max fier sur le rose du néon, tools/pack-icone.py) pour l'onglet et le raccourci sur l'écran d'accueil.
+     Adresses relatives : fichiers de dist/ servis par Cloudflare (sur claude.ai, sans effet). -->
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
+<link rel="apple-touch-icon" href="icone-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#241C19">
+<meta name="apple-mobile-web-app-title" content="{{lieu}}">
+<!-- Aperçu des liens partagés (WhatsApp, Messages…) : titre, phrase et image (dist/apercu.jpg, faite par tools/pack-apercu.py).
+     L'adresse de l'image doit être complète : les messageries ne la lisent pas autrement. -->
+<meta property="og:image" content="{{urlPublique}}apercu.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{jeu}} : tu me bats ?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Tu es derrière le comptoir de {{lieu}}. Deux minutes de service : tu fais mieux ?">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{jeu}}">
+<meta property="og:title" content="{{jeu}} : relève le défi !">
+<meta property="og:description" content="Tu es derrière le comptoir de {{lieu}}. Deux minutes de service : tu fais mieux ?">
+<style>
+/*__STYLE__*/
+</style>
+<div id="app">
+  <canvas id="cv" aria-label="{{jeu}} : le bar, les clients et les tireuses"></canvas>
+  <div id="frame">
+    <div id="hud" hidden>
+      <button type="button" id="bTestA" class="hb test" title="Déclencher Alex" hidden>A</button>
+      <button type="button" id="bTestH" class="hb test" title="Déclencher Hugo" hidden>H</button>
+      <button type="button" id="bTestJ" class="hb test" title="Déclencher Jérémie" hidden>J</button>
+      <button type="button" id="bMute" class="hb" aria-label="Son" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M4 9h4l5-4v14l-5-4H4z"/><path class="on" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path class="off" d="M16 9l6 6M22 9l-6 6"/></svg>
+      </button>
+      <button type="button" id="bPause" class="hb" aria-label="Pause">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>
+      </button>
+    </div>
+
+    <section id="sTitle" class="screen" aria-labelledby="tTitle">
+      <button type="button" id="bTitlePanel" class="hb gear" aria-label="Réglages de test" title="Réglages de test">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.6-2-3.4-2.4 1a7.5 7.5 0 0 0-2.6-1.5L14 2.5h-4l-.4 2.5A7.5 7.5 0 0 0 7 6.5l-2.4-1-2 3.4 2 1.6a7.6 7.6 0 0 0 0 3l-2 1.6 2 3.4 2.4-1a7.5 7.5 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.5 7.5 0 0 0 2.6-1.5l2.4 1 2-3.4z"/></svg>
+      </button>
+      <div class="t-sign">
+        <h1 id="tTitle" class="t-logo"><span class="sr-only">{{lieu}} </span>Arcade</h1>
+        <p class="t-tag">Tu es Max, derrière le comptoir.</p>
+      </div>
+      <div class="t-counter">
+        <div class="t-host">
+          <div class="t-max" role="img" aria-label="Max, le barman, essuie un verre"></div>
+          <p class="t-say"><span id="tSay">Deux minutes de service. Le bar va vite se remplir !</span><span id="tRankLead" class="t-say-rank" hidden></span></p>
+        </div>
+        <div class="t-bar">
+          <ol class="t-steps" aria-label="Comment jouer">
+            <li><span class="t-ico t-ico-drink" aria-hidden="true"></span><b>Prends</b><small>une boisson</small></li>
+            <li><span class="t-ico t-ico-tray" aria-hidden="true"><i></i></span><b>Glisse</b><small id="tStep2">le plateau</small></li>
+            <li><span class="t-ico t-ico-cust" aria-hidden="true"></span><b>Sers</b><small>le bon client</small></li>
+          </ol>
+          <p class="t-note">La première fois, Max te guide geste par geste. Le chrono attend.</p>
+          <button type="button" id="bStart" class="primary t-go">Ouvrir le bar</button>
+          <div class="t-foot">
+            <p id="tBest" class="t-best"></p>
+            <button type="button" id="bRank" class="t-rank" hidden><span class="t-trophy" aria-hidden="true"></span><span class="t-rank-l">Top de la semaine</span><span class="t-rank-s" aria-hidden="true">Top 10</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- v1.44 : pause au comptoir, de la même famille que l'accueil (Max essuie un verre en attendant, la partie en cours sur trois ardoises) -->
+    <section id="sPause" class="screen" aria-labelledby="pTitle" hidden>
+      <div class="t-sign p-sign">
+        <h2 id="pTitle" class="t-logo p-logo">Pause</h2>
+        <p class="t-tag p-tag">Le chrono est arrêté.</p>
+      </div>
+      <div class="t-counter">
+        <div class="t-host">
+          <div class="t-max" role="img" aria-label="Max essuie un verre en t'attendant"></div>
+          <p class="t-say p-say"><span id="pSay">Je t’attends. Les clients aussi…</span><span id="pBack" class="p-say-back" hidden>Encore un geste « retour » et tu quittes le bar !</span></p>
+        </div>
+        <div class="t-bar">
+          <dl class="p-stats">
+            <div><dt>Temps</dt><dd id="pTime">2:00</dd></div>
+            <div><dt>Score</dt><dd id="pScore">0</dd></div>
+            <div><dt>Combo</dt><dd id="pCombo">×1</dd></div>
+          </dl>
+          <button type="button" id="bResume" class="primary t-go">Reprendre</button>
+          <div class="p-row">
+            <button type="button" id="bRestart" class="t-rank p-btn">Rejouer</button>
+            <button type="button" id="bQuit" class="t-rank p-btn">Menu</button>
+          </div>
+          <button type="button" id="bPausePanel" class="b-link p-link">Réglages de test</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="sEnd" class="screen" aria-labelledby="eTitle" hidden>
+      <div class="end-stack">
+        <div class="r-shadow">
+          <article class="receipt">
+            <header class="r-head">
+              <p class="r-shop">GALOPINS ARCADE</p>
+              <p id="eMeta" class="r-meta"></p>
+            </header>
+            <h2 id="eTitle" class="r-title">L’addition</h2>
+            <dl id="eStats" class="r-lines"></dl>
+            <div class="r-total"><span>TOTAL</span><strong id="eScore">0</strong></div>
+            <p id="eRecord" class="r-stamp" hidden>Nouveau record !</p>
+            <p id="eDefi" class="r-defi" aria-live="polite" hidden></p>
+            <!-- v1.40 : le score en image de story, à poster en taguant le bar -->
+            <button type="button" id="eStory" class="r-story">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8a9.2 9.2 0 1 1-6.5 2.7" stroke-dasharray="2.6 2.2"/><path d="M12 8v8M8 12h8"/></svg>
+              <span><b id="eStoryL">Ton score en story</b><small id="eStoryS">{{tague}}</small></span>
+            </button>
+            <section id="eRank" class="r-rank" aria-labelledby="eRankH" hidden>
+              <h3 id="eRankH" class="r-rank-h">Classement de la semaine</h3>
+              <form id="eRankForm" class="r-rank-form" novalidate hidden>
+                <label for="eName">Ton nom au tableau</label>
+                <div class="r-rank-row">
+                  <input id="eName" type="text" maxlength="12" autocomplete="nickname" autocapitalize="words" spellcheck="false" enterkeyhint="send" placeholder="________">
+                  <button type="submit" id="eRankGo">Inscrire</button>
+                </div>
+              </form>
+              <p id="eRankMsg" class="r-rank-msg" aria-live="polite" hidden></p>
+              <ol id="eRankTop" class="r-rank-top" hidden></ol>
+              <div class="r-rank-links">
+                <button type="button" id="eRankRetry" class="r-link" hidden>Réessayer</button>
+                <button type="button" id="eRankAll" class="r-link" hidden>Voir le top 10</button>
+                <button type="button" id="eRankRename" class="r-link" hidden>Changer de nom</button>
+                <button type="button" id="eRankReset" class="r-link" hidden>Remettre les réglages par défaut</button>
+              </div>
+            </section>
+            <p class="r-ask">Ton avis sur la partie</p>
+            <div id="eRate" class="r-boxes" role="group" aria-label="Ton avis sur la partie">
+              <button type="button" data-r="bof" aria-pressed="false">Bof</button>
+              <button type="button" data-r="bien" aria-pressed="false">Bien</button>
+              <button type="button" data-r="top" aria-pressed="false">Top</button>
+            </div>
+            <p class="r-thanks">Merci, à demain !</p>
+            <!-- v1.38 : pied du ticket, le compte Instagram du bar (ouvre l'appli Instagram si elle est installée).
+                 v1.39 : seulement après un premier toucher du néon de la barre du bas (rappel discret). -->
+            <a id="eInsta" class="r-insta" href="https://www.instagram.com/{{insta}}/" target="_blank" rel="noopener" hidden>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5a2 2 0 0 1 2-2h2.6l1.6-2.5h5.6l1.6 2.5H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13.6" r="3.7"/></svg>
+              <span><small>Suis le bar sur Instagram</small><b>@{{insta}}</b></span>
+            </a>
+            <p id="eModes" class="r-fine"></p>
+          </article>
+        </div>
+        <!-- v1.24 : barre collée en bas de l'écran, l'addition défile derrière (Rejouer toujours visible) -->
+        <div class="end-dock">
+          <!-- v1.39 : Instagram du bar en néon dans la barre du bas, visible sans défiler ; caché une fois touché (le pied du ticket prend le relais) -->
+          <a id="bInsta" class="insta" href="https://www.instagram.com/{{insta}}/" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5a2 2 0 0 1 2-2h2.6l1.6-2.5h5.6l1.6 2.5H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13.6" r="3.7"/></svg>
+            <span class="insta-t"><b id="bInstaL">Suis-nous sur Insta</b><small id="bInstaS">@{{insta}}</small></span>
+            <span class="insta-go" aria-hidden="true">›</span>
+          </a>
+          <button type="button" id="bShare" class="share">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8 15.7 6.2M8.3 13.2l7.4 4.6"/></svg>
+            <span id="bShareL">Défier un pote</span>
+          </button>
+          <button type="button" id="bReplay" class="primary">Rejouer</button>
+        </div>
+        <div class="end-actions">
+          <div class="btns">
+            <button type="button" id="bEndMenu" class="ghost">Menu</button>
+            <button type="button" id="bEndPanel" class="ghost">Réglages</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- v1.45 : top 10 au comptoir, de la même famille que l'accueil et la pause (titre comme ARCADE, liste sur l'ardoise des stations,
+         comptoir en bas avec « Ouvrir le bar » / « Rejouer » toujours sous le pouce) -->
+    <section id="sRank" class="screen" aria-labelledby="kTitle" hidden>
+      <div class="k-head">
+        <div class="k-crest" aria-hidden="true"><span class="k-laurel k-laurel-l"></span><span class="k-crown"></span><span class="k-laurel k-laurel-r"></span></div>
+        <h2 id="kTitle" class="k-title">Top de la semaine</h2>
+        <p id="kWeek" class="k-week"></p>
+        <div class="k-tabs" role="tablist" aria-label="Période du classement">
+          <button type="button" role="tab" id="kTabWeek" aria-selected="true">Cette semaine</button>
+          <button type="button" role="tab" id="kTabAll" aria-selected="false">De tous les temps</button>
+        </div>
+      </div>
+      <div class="k-slate">
+        <ol id="kList" class="k-list"></ol>
+        <p id="kEmpty" class="k-empty" hidden>Personne encore cette semaine. À toi d’ouvrir le bal !</p>
+        <p id="kMine" class="k-mine" hidden></p>
+      </div>
+      <div class="t-bar k-bar">
+        <div class="k-row">
+          <button type="button" id="bRankBack" class="t-rank p-btn">Retour</button>
+          <button type="button" id="bRankPlay" class="primary t-go">Ouvrir le bar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- v1.40-v1.42 : aperçu de la story. Un téléphone qui sait partager une image montre les étapes et « Partager sur Insta »
+         (une page web ne peut pas ouvrir Instagram directement en mode Story : feuille de partage, puis Instagram, puis Story).
+         Sinon (ordinateur, page claude.ai) : appui long pour enregistrer l'image. -->
+    <div id="sStory" class="story-view" role="dialog" aria-labelledby="sStoryT" hidden>
+      <img id="sStoryImg" alt="Ton score sur {{jeu}}, à poster en story">
+      <h2 id="sStoryT" class="story-title">Ta story est prête</h2>
+      <ol id="sStorySteps" class="story-steps">
+        <li><span>Touche <b>Partager</b>, choisis <b>Instagram</b></span></li>
+        <li><span>Puis choisis <b>Story</b></span></li>
+        {{liTag}}
+      </ol>
+      <p id="sStoryHelp" class="story-help" hidden>Appuie longuement sur l’image pour l’enregistrer, puis ajoute-la en story depuis Instagram{{taguant}}.</p>
+      <div id="sStoryBtns" class="story-btns">
+        <a id="sStoryDl" class="ghost" download hidden>Télécharger</a>
+        <button type="button" id="sStoryClose" class="ghost">Fermer</button>
+        <button type="button" id="sStoryGo" class="share">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8 15.7 6.2M8.3 13.2l7.4 4.6"/></svg>
+          <span>Partager</span>
+        </button>
+      </div>
+    </div>
+
+    <section id="sPanel" class="sheet" aria-labelledby="sheetTitle" hidden>
+      <header class="sheet-head">
+        <h2 id="sheetTitle">Réglages de test</h2>
+        <button type="button" id="bPanelClose" class="primary small">Terminé</button>
+      </header>
+      <div id="pMode" class="chips p-mode" aria-label="Mode actuel"></div>
+      <div id="pControls"></div>
+      <h3>Simulateur</h3>
+      <p class="note">Un joueur virtuel enchaîne 120 parties en service simple puis 120 en tirage, avec tes réglages. Utile pour vérifier qu’un objectif est atteignable.</p>
+      <div id="pSimProf" class="seg" role="group" aria-label="Niveau du joueur virtuel">
+        <button type="button" data-v="debutant" aria-pressed="false">Débutant</button>
+        <button type="button" data-v="bon" aria-pressed="true">Bon joueur</button>
+        <button type="button" data-v="expert" aria-pressed="false">Expert</button>
+      </div>
+      <button type="button" id="pSimRun" class="ghost wide">Comparer simple et tirage</button>
+      <div id="pSimOut"></div>
+      <h3>Historique des parties</h3>
+      <div id="pHist"></div>
+      <div class="btns">
+        <button type="button" id="pHistClear" class="ghost">Effacer l’historique</button>
+        <button type="button" id="bPanelReset" class="ghost">Réglages par défaut</button>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+(function () {
+'use strict';
+/*__SCRIPT__*/
+})();
+</script>
