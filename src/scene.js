@@ -453,24 +453,25 @@ function drawPullGauge(ctx, g, cfg, now) {
   const msg = brewMsg || pullMessage(cfg, fill);
   text(ctx, msg.text, x + w / 2, y + 22, inZ ? 23 + Math.sin(now * 30) : 20, msg.color, { pixel: true });
   // le verre, à gauche ; la réglette, à droite
-  const sc = 2, gx = x + 38, gy = y + h - 8;
-  const lvY = (f) => gy - 30 * sc * f;
+  // Volta : zones calées sur le corps de la tasse de chocolat (décalé à gauche par l'anse) et sur le vrai niveau du liquide (CUP, src/render.js)
+  const sc = 2, gx = x + 44, gy = y + h - 8, zx = gx + CUP.cx * sc, zw = CUP.half * sc;
+  const lvY = (f) => gy + sc * (CUP.base + (CUP.top - CUP.base) * f);
   drawGlass(ctx, 'ipa', gx, gy, sc, Math.min(1, fill), { foamOver: Math.max(0, fill - 1) / (cfg.overflowAt - 1) });
   const yLo = lvY(cfg.perfectLo), yHi = lvY(Math.min(1.06, cfg.perfectHi));
-  ctx.fillStyle = 'rgba(243,155,177,0.3)'; ctx.fillRect(gx - 26, yHi, 52, yLo - yHi);
+  ctx.fillStyle = 'rgba(243,155,177,0.3)'; ctx.fillRect(zx - zw, yHi, 2 * zw, yLo - yHi);
   ctx.strokeStyle = C.rose; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
-  ctx.beginPath(); ctx.moveTo(gx - 26, yHi); ctx.lineTo(gx + 26, yHi); ctx.moveTo(gx - 26, yLo); ctx.lineTo(gx + 26, yLo); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(zx - zw, yHi); ctx.lineTo(zx + zw, yHi); ctx.moveTo(zx - zw, yLo); ctx.lineTo(zx + zw, yLo); ctx.stroke();
   // v1.29 : Jérémie attend → sa zone dorée, plus étroite, dans la zone rose
   const brew = g.jerWants(), jLo = lvY(cfg.jeremieLo), jHi = lvY(cfg.jeremieHi);
   if (brew) {
-    ctx.fillStyle = 'rgba(243,182,64,0.45)'; ctx.fillRect(gx - 26, jHi, 52, jLo - jHi);
+    ctx.fillStyle = 'rgba(243,182,64,0.45)'; ctx.fillRect(zx - zw, jHi, 2 * zw, jLo - jHi);
     ctx.strokeStyle = C.gold; ctx.setLineDash([]);
-    ctx.beginPath(); ctx.moveTo(gx - 26, jHi); ctx.lineTo(gx + 26, jHi); ctx.moveTo(gx - 26, jLo); ctx.lineTo(gx + 26, jLo); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(zx - zw, jHi); ctx.lineTo(zx + zw, jHi); ctx.moveTo(zx - zw, jLo); ctx.lineTo(zx + zw, jLo); ctx.stroke();
     ctx.setLineDash([4, 3]);
   }
   const yMin = lvY(cfg.goodLo), okMin = fill >= cfg.goodLo;
   ctx.strokeStyle = okMin ? 'rgba(247,235,213,0.5)' : C.bad;
-  ctx.beginPath(); ctx.moveTo(gx - 26, yMin); ctx.lineTo(gx + 26, yMin); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(zx - zw, yMin); ctx.lineTo(zx + zw, yMin); ctx.stroke();
   ctx.setLineDash([]);
   // réglette : rouge = trop vide, crème = acceptée, rose = parfaite, jaune = trop
   const bx = x + w - 20, bTop = lvY(1.15);

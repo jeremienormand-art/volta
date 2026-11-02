@@ -85,6 +85,8 @@ function drawGlass(ctx, d, cx, by, s, fill = 1, opt = {}) {
   ctx.drawImage(sprite, -24 * s, -44 * s, 48 * s, 64 * s);
   ctx.restore();
 }
+// Volta : tasse de chocolat (tools/pack-boissons.py) : corps centré à −4,3 (l'anse à droite), demi-largeur 10, liquide de −1 (vide) à −28 (plein).
+const CUP = { cx: -4.3, half: 11, base: -1, top: -28 };
 // Atlas illustré partagé entre stations, commandes, plateau et scènes.
 // La découpe révèle le liquide du bas vers le haut et conserve les gestes de tirage.
 function drawIllustratedGlass(ctx, d, cx, by, s, fill, opt) {
@@ -109,13 +111,13 @@ function drawIllustratedGlass(ctx, d, cx, by, s, fill, opt) {
     draw(1);
     if (f > 0) {
       // Volta : repères mesurés par tools/pack-boissons.py (chocolat dans la tasse en verre, tasse d'expresso, croissant)
-      const base = d === 'stout' ? -7 : d === 'spritz' ? -5 : d === 'shot' ? -4 : -1;
-      const top = d === 'shot' ? -15 : d === 'spritz' ? -14 : -28;
+      const base = d === 'stout' ? -7 : d === 'spritz' ? -5 : d === 'shot' ? -4 : CUP.base;
+      const top = d === 'shot' ? -15 : d === 'spritz' ? -14 : CUP.top;
       const level = base - (base - top) * f;
       ctx.save(); ctx.beginPath(); ctx.rect(-24, level, 48, 44 - level); ctx.clip(); draw(0); ctx.restore();
       if (d === 'ipa') {   // Volta : surface du chocolat dans la tasse (corps de la tasse centré à −4,3, l'anse à droite)
         ctx.fillStyle = '#B98560';
-        ctx.beginPath(); ctx.ellipse(-4.3, level + 1, 8, 1.6, 0, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(CUP.cx, level + 1, 8, 1.6, 0, 0, 7); ctx.fill();
       }
     }
   }
