@@ -1,5 +1,21 @@
 # Demandes à ChatGPT
 
+## Volta : nouveaux clients d'après les proches d'Anaïs (3 novembre 2026)
+
+Joindre `ref-style-clients.png` (image 1), `ref-equipe-volta.png` (image 2 : Etienne, Michel, Fabien, Marie) et une photo de la personne de face, bien éclairée (image 3). Une conversation par personne.
+À la réception : jusqu'à 3 planches remplacent Nico, Roxane et Jeremy sans changer le code (`assets/sources/nico.png`, `roxane.png`, `jeremy.png`, découpées par `python3 tools/pack-friend.py assets/sources/<nom>.png assets/characters/<nom>.webp`) ; au-delà, ajouter une entrée dans `FRIENDS` (`src/portraits.js`), sa marque dans `build.mjs` et `LOOKS`. Les répliques de celui qui parle sont dans `TALK` (`src/render.js`).
+```
+Planche de 4 bustes de [Prénom] sur une ligne, cases 4:5 de même taille, même cadrage dans chaque case.
+Style : exactement celui des clients de l'image 1 et de l'équipe de l'image 2 (tête grande, yeux expressifs, contours fins sombres, quelques tons chauds, petits pixels nets).
+Identité : la personne de la photo (image 3), ressemblance gardée (coupe, barbe, lunettes, bijoux). C'est un client du café d'une salle de sport : tenue de sport (tee technique ou débardeur, serviette sur l'épaule possible).
+Expressions exagérées, lisibles à 50 pixels de haut, dans cet ordre :
+1. neutre : attend sa commande, petit sourire ;
+2. content : grand sourire, il vient d'être servi ;
+3. agacé : sourcils froncés, moue, ça traîne ;
+4. furieux : joues rouges, sourcils très froncés, bouche crispée, il va partir.
+Bustes de face coupés mi-poitrine, sans les mains, tête près du haut de la case. Fond vert uni #00FF00 partout autour des bustes, sans ombre ni halo. Aucun texte.
+```
+
 À joindre à chaque demande de personnage :
 - **Image 1** : `ref-style-clients.png` — le style à suivre (clients du jeu).
 - **Image 2** : `ref-equipe.png` — Max, Alex, Hugo tels qu'ils sont en jeu, de gauche à droite.

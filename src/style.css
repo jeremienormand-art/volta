@@ -197,8 +197,8 @@ button { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anyw
 .t-say::before { content: ""; position: absolute; left: -8px; bottom: 12px; border-style: solid; border-width: 7px 9px 7px 0; border-color: transparent #F7EBD5 transparent transparent; }
 .t-bar { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 12px;
   padding: 22px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
-  background: linear-gradient(rgba(30,18,12,0.5), rgba(30,18,12,0.3)), var(--img-wood) center top / 100% auto repeat-y, #704023; }
-.t-bar::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 9px; background: #79502F; border-top: 2px solid #C99356; border-bottom: 2px solid #493021; box-shadow: 0 3px 6px rgba(0,0,0,0.35); }
+  background: linear-gradient(rgba(30,18,12,0.5), rgba(30,18,12,0.3)), var(--img-wood) center top / 100% auto repeat-y, #2A201B; }
+.t-bar::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 9px; background: #B9803F; border-top: 2px solid #E2AE62; border-bottom: 2px solid #493021; box-shadow: 0 3px 6px rgba(0,0,0,0.35); }
 .t-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; counter-reset: step; }
 .t-steps li { position: relative; min-width: 0; counter-increment: step; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center;
   border: 5px solid transparent; border-image: var(--menu-frame) 28 fill / var(--slate-w, 5px) / 0 stretch; padding: 8px 4px 9px; }

@@ -167,8 +167,8 @@ function drawRoom(ctx, t, top0, inGame) {
 
 function drawCounter(ctx) {
   const y = L.counterTop, h = L.counterBot - y;
-  ctx.fillStyle = '#79502F'; ctx.fillRect(-40, y, 440, h);
-  ctx.fillStyle = '#C99356'; ctx.fillRect(-40, y, 440, 2);
+  ctx.fillStyle = '#B9803F'; ctx.fillRect(-40, y, 440, h);   // Volta : rebord en bois clair
+  ctx.fillStyle = '#E2AE62'; ctx.fillRect(-40, y, 440, 2);
   ctx.fillStyle = '#493021'; ctx.fillRect(-40, y + h - 2, 440, 2);
 }
 

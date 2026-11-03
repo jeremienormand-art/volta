@@ -168,10 +168,10 @@ function drawStory(info) {
     if (artReady(SERVICE_PANEL)) {
       const ph = W * SERVICE_PANEL.naturalHeight / SERVICE_PANEL.naturalWidth;
       for (let yy = counterTop; yy < H; yy += ph) ctx.drawImage(SERVICE_PANEL, 0, yy, W, ph);
-    } else { ctx.fillStyle = '#704023'; ctx.fillRect(0, counterTop, W, H - counterTop); }
+    } else { ctx.fillStyle = '#2A201B'; ctx.fillRect(0, counterTop, W, H - counterTop); }
     ctx.fillStyle = 'rgba(30,18,12,0.42)'; ctx.fillRect(0, counterTop, W, H - counterTop);
-    ctx.fillStyle = '#79502F'; ctx.fillRect(0, counterTop, W, 24);
-    ctx.fillStyle = '#C99356'; ctx.fillRect(0, counterTop, W, 5);
+    ctx.fillStyle = '#B9803F'; ctx.fillRect(0, counterTop, W, 24);
+    ctx.fillStyle = '#E2AE62'; ctx.fillRect(0, counterTop, W, 5);
     ctx.fillStyle = '#493021'; ctx.fillRect(0, counterTop + 19, W, 5);
   }
 

@@ -161,7 +161,7 @@ function renderGame(ctx, g, cfg) {
 function drawServiceSurface(ctx) {
   const top = L.maxTop;
   const px = L.padX, pw = 360 + 2 * L.padX;
-  ctx.fillStyle = '#704023'; ctx.fillRect(-px, top, pw, L.H - top);
+  ctx.fillStyle = '#2A201B'; ctx.fillRect(-px, top, pw, L.H - top);
   if (SERVICE_PANEL.complete && SERVICE_PANEL.naturalWidth) {
     ctx.drawImage(SERVICE_PANEL, -px, top, pw, L.H - top);
   }
