@@ -20,7 +20,7 @@ const CUT_HUGO = 1.4;   // s, entrée d'Hugo (jeu figé)
 const ALEX_TELEGRAPH = 1.1;
 const CUT_JEREMIE = 2.6;   // s, carton du contrôle qualité (jeu figé)
 const JER_TASTE = 1.15;    // s, Jérémie goûte : pause dramatique avant le verdict
-const LOOKS = 18; // Neuf visuels de clients, deux indices chacun (Anaïs : 8 et 9, Nico/Antoine : 10 et 11, Roxane/Fanny : 12 et 13, Jeremy/Djaher : 14 et 15, Elea : 16 et 17).
+const LOOKS = 20; // Dix visuels de clients, deux indices chacun (Anaïs : 8 et 9, Nico/Antoine : 10 et 11, Roxane/Fanny : 12 et 13, Jeremy/Djaher : 14 et 15, Elea : 16 et 17, Nise : 18 et 19).
 // Personne affichée par un indice : les clients de base 0-7 n'ont que quatre visages (indice % 4), chaque ami en a deux indices.
 function lookPerson(look) { return look < 8 ? look % 4 : 4 + ((look - 8) >> 1); }
 // Table de potes : l'ami en retrait, dessiné par render.js (choisi à l'arrivée dans `mate` ; ceci reste le repli).

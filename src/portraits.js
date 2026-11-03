@@ -43,10 +43,11 @@ const ROXANE = new Image(); ROXANE.src = '__ROXANE_DATA__';
 const JEREMY = new Image(); JEREMY.src = '__JEREMY_DATA__';
 // Volta : Elea, cliente de la salle (même format que les amis)
 const ELEA = new Image(); ELEA.src = '__ELEA_DATA__';
+const NISE = new Image(); NISE.src = '__NISE_DATA__';
 // v1.26 : Jérémie, bande verticale de 5 cases 192 × 224 (tools/pack-friend.py … 5) : neutre (carnet), goûte, approuve, grimace, pompette.
 const JEREMIE = new Image(); if (JEREMIE_IN_PAGE) JEREMIE.src = JEREMIE_DATA;
 const JER_ROWS = 5, JER_ROW = { idle: 0, taste: 1, approve: 2, reject: 3, tipsy: 4 };
-const FRIENDS = [{ key: 'anais', img: ANAIS, rows: 3 }, { key: 'nico', img: NICO, rows: 4 }, { key: 'roxane', img: ROXANE, rows: 4 }, { key: 'jeremy', img: JEREMY, rows: 4 }, { key: 'elea', img: ELEA, rows: 4 }];
+const FRIENDS = [{ key: 'anais', img: ANAIS, rows: 3 }, { key: 'nico', img: NICO, rows: 4 }, { key: 'roxane', img: ROXANE, rows: 4 }, { key: 'jeremy', img: JEREMY, rows: 4 }, { key: 'elea', img: ELEA, rows: 4 }, { key: 'nise', img: NISE, rows: 4 }];
 function friendOf(look) { return look >= 8 ? FRIENDS[Math.floor((look - 8) / 2) % FRIENDS.length] : null; }
 const CUSTOMERS = new Image();
 CUSTOMERS.src = '__CUSTOMERS_DATA__';

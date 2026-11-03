@@ -24,6 +24,7 @@ const SCRIPT_ASSETS = {
   __ROXANE_DATA__: 'characters/roxane.webp',
   __JEREMY_DATA__: 'characters/jeremy.webp',
   __ELEA_DATA__: 'characters/elea.webp',   // Volta
+  __NISE_DATA__: 'characters/nise.webp',   // Volta
   __NEON_ON_DATA__: 'ui/neon-on.webp',
   __NEON_OFF_DATA__: 'ui/neon-off.webp',
   __BELL_DATA__: 'ui/bell.webp',
