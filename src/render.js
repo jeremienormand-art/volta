@@ -212,13 +212,14 @@ function drawCustomer(ctx, g, s, now) {
 }
 
 // ── Les amis parlent (v1.13) ──
-// Une bulle au-dessus de la commande, le temps d'une phrase. Nico est le second serveur du Galopins : aujourd'hui, il est off.
+// Une bulle au-dessus de la commande, le temps d'une phrase. Volta : Antoine, coach de la salle, sort de son cours.
 const TALK = {
+  // Volta : Antoine, coach de la salle, prend la place de Nico (même case de l'atlas, clé « nico »)
   nico: {
-    first: 'Je suis off aujourd’hui !', reply: 'Et moi, je bosse pour deux…',
-    again: ['Encore moi !', 'Je regarde comment tu bosses.', 'Off, je te dis !', 'Tu sers mieux que moi…'],
-    served: ['Merci collègue !', 'Pas mal, pour un débutant.', 'Service nickel !'],
-    wrong: 'C’est pas ma commande, ça !', left: 'Je vais me servir moi-même !',
+    first: 'Fin de cours, j’ai soif !', reply: 'Moi, je suis en plein cardio…',
+    again: ['Encore moi ! Série suivante.', 'Allez, on garde le rythme !', 'Tu verses mieux que tu squattes.', 'Récup active au comptoir.'],
+    served: ['Merci champion !', 'Belle exécution !', 'Propre, la technique !'],
+    wrong: 'C’est pas mon programme, ça !', left: 'Je file faire mes burpees !',
   },
 };
 function linesOf(s) { const f = s && !s.isAlex ? friendOf(s.look) : null; return f ? TALK[f.key] : null; }
