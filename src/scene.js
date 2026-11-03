@@ -350,7 +350,7 @@ function stationCaption(g, d) {
   if (gs === 'hold') return g && !g.st.ipa.pulling && g.tray.some((x) => x.q === 'low') ? 'compléter' : 'maintenir';
   if (gs === 'rest') {
     const p = g.st.stout.phase;
-    return p === 'idle' ? 'lancer' : p === 'ready' ? 'prête !' : 'repose…';
+    return p === 'idle' ? 'lancer' : p === 'ready' ? 'prêt !' : 'infuse…';
   }
   return 'toucher';
 }
@@ -399,7 +399,7 @@ function drawStations(ctx, g, cfg, now) {
     }
     text(ctx, DRINK_NAMES[d].toUpperCase(), x, top + 125, 21, C.creme, { pixel: true });
     const cap = blocked ? 'plateau plein' : stationCaption(g, d);
-    if (cap) text(ctx, cap, x, top + 140, 10.5, cap === 'prête !' ? C.rose : (blocked || cap === 'compléter') ? C.warn : C.cremeD, { weight: 700 });
+    if (cap) text(ctx, cap, x, top + 140, 10.5, cap === 'prêt !' ? C.rose : (blocked || cap === 'compléter') ? C.warn : C.cremeD, { weight: 700 });
     ctx.restore();
   }
 }

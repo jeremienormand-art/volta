@@ -98,9 +98,9 @@ function coachText(g, cfg, st) {
     }
     case 'tap':
       return { main: 'Touche ici', sub: cfg.prep === 'simple' ? (many ? 'la commande va sur ton plateau' : 'Etienne prend la commande') : 'un toucher suffit' };
-    case 'stoutLaunch': return { main: 'Touche pour lancer le matcha', sub: 'elle doit reposer un peu' };
-    case 'stoutRest': return { main: 'Le matcha infuse…', sub: 'reviens la prendre quand elle est prête' };
-    case 'stoutReady': return { main: 'Elle est prête !', sub: 'touche pour la prendre', tone: 'rose' };
+    case 'stoutLaunch': return { main: 'Touche pour lancer le matcha', sub: 'il doit infuser un peu' };
+    case 'stoutRest': return { main: 'Le matcha infuse…', sub: 'reviens le prendre quand il est prêt' };
+    case 'stoutReady': return { main: 'Il est prêt !', sub: 'touche pour le prendre', tone: 'rose' };
     case 'serve':
       if (n === 'tapTray') return { main: 'Garde le doigt sur le plateau', sub: 'et glisse jusqu’au client', tone: 'warn' };
       if (n === 'miss') return { main: 'Lâche sur le client', sub: 'glisse jusqu’à lui', tone: 'warn' };

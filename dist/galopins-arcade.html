@@ -3013,7 +3013,7 @@ function stationCaption(g, d) {
   if (gs === 'hold') return g && !g.st.ipa.pulling && g.tray.some((x) => x.q === 'low') ? 'compléter' : 'maintenir';
   if (gs === 'rest') {
     const p = g.st.stout.phase;
-    return p === 'idle' ? 'lancer' : p === 'ready' ? 'prête !' : 'repose…';
+    return p === 'idle' ? 'lancer' : p === 'ready' ? 'prêt !' : 'infuse…';
   }
   return 'toucher';
 }
@@ -3062,7 +3062,7 @@ function drawStations(ctx, g, cfg, now) {
     }
     text(ctx, DRINK_NAMES[d].toUpperCase(), x, top + 125, 21, C.creme, { pixel: true });
     const cap = blocked ? 'plateau plein' : stationCaption(g, d);
-    if (cap) text(ctx, cap, x, top + 140, 10.5, cap === 'prête !' ? C.rose : (blocked || cap === 'compléter') ? C.warn : C.cremeD, { weight: 700 });
+    if (cap) text(ctx, cap, x, top + 140, 10.5, cap === 'prêt !' ? C.rose : (blocked || cap === 'compléter') ? C.warn : C.cremeD, { weight: 700 });
     ctx.restore();
   }
 }
@@ -3737,9 +3737,9 @@ function coachText(g, cfg, st) {
     }
     case 'tap':
       return { main: 'Touche ici', sub: cfg.prep === 'simple' ? (many ? 'la commande va sur ton plateau' : 'Etienne prend la commande') : 'un toucher suffit' };
-    case 'stoutLaunch': return { main: 'Touche pour lancer le matcha', sub: 'elle doit reposer un peu' };
-    case 'stoutRest': return { main: 'Le matcha infuse…', sub: 'reviens la prendre quand elle est prête' };
-    case 'stoutReady': return { main: 'Elle est prête !', sub: 'touche pour la prendre', tone: 'rose' };
+    case 'stoutLaunch': return { main: 'Touche pour lancer le matcha', sub: 'il doit infuser un peu' };
+    case 'stoutRest': return { main: 'Le matcha infuse…', sub: 'reviens le prendre quand il est prêt' };
+    case 'stoutReady': return { main: 'Il est prêt !', sub: 'touche pour le prendre', tone: 'rose' };
     case 'serve':
       if (n === 'tapTray') return { main: 'Garde le doigt sur le plateau', sub: 'et glisse jusqu’au client', tone: 'warn' };
       if (n === 'miss') return { main: 'Lâche sur le client', sub: 'glisse jusqu’à lui', tone: 'warn' };
