@@ -1,5 +1,5 @@
 // Généré par build.mjs : ne pas modifier à la main (copie de src/config.js et src/core.js pour le Worker).
-export const LOGIC_ID = '0e78b8cf5ef5';
+export const LOGIC_ID = '587bf4585887';
 // ─────────────────────────────────────────────────────────────
 // CONFIG — tout l'équilibrage du jeu. Rien d'autre à toucher pour régler.
 // Les valeurs sont des hypothèses de test, modifiables en jeu (panneau Réglages).
@@ -106,7 +106,7 @@ const DEFAULTS = {
   bonusEmptyBar: 300,
 
   // Confort et test
-  sway: true,               // tangage pendant l'effet d'Alex
+  sway: false,              // tangage pendant l'effet d'Alex (Volta : coupé, une blague ne fait pas tanguer la salle)
   sound: true,
   haptics: true,
   showZones: false,         // affiche les zones tactiles

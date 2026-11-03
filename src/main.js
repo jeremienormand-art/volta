@@ -346,11 +346,11 @@ function onEvent(e) {
     case 'alexOffer': Sfx.alexHey(); setMood('wary', 0.8); say('Michel a une blague… points ×' + String(c.alexMult).replace('.', ',') + ' ?', 2, true); break;
     case 'alexIgnored': say('Plus tard, Michel !', 1.2, true); break;
     case 'alexCut':
-      Sfx.gulp(); if (P.id !== null) onEnd();
+      Sfx.laugh(); if (P.id !== null) onEnd();
       if (firstTime('alex_' + c.alexMode)) g.waitTap();
       break;
     case 'alexEffect':
-      Sfx.hiccup();
+      Sfx.swap();
       say(c.alexMode === 'inversion' ? 'Malaise… sers l’inverse !' : 'Les postes ont bougé !', 1.8, true);
       break;
     case 'alexEnding': say('Ça passe…', 1.2, true); break;
@@ -371,7 +371,7 @@ function onEvent(e) {
       break;
     case 'jeremieArrive': {
       const s = g.seats[e.seat];
-      if (e.tipsy) { Sfx.hiccup(); setMood('wary', 1); say('Encore elle ?', 1.3, true); if (s) talk(s, 'Fin de séance… j’ai faim !', 2.2); }
+      if (e.tipsy) { Sfx.ready(); setMood('wary', 1); say('Encore elle ?', 1.3, true); if (s) talk(s, 'Fin de séance… j’ai faim !', 2.2); }
       break;   // premier passage : il parle à la fin du carton (jeremieGo)
     }
     case 'jeremieGo': { const s = g.seats[e.seat]; say('Un chocolat parfait pour Marie !', 1.8, true); if (s) talk(s, 'Un chocolat, s’il te plaît.', 2); break; }
@@ -579,7 +579,7 @@ function showScreen(id) {
 function modeLabel(c) {
   const prep = c.prep === 'simple' ? 'Service simple' : 'Service avec tirage';
   const tray = (c.trayMax || 1) > 1 ? `Plateau de ${c.trayMax}` : 'Un verre à la fois';
-  const alex = !c.alexOn ? 'sans Michel' : `Michel : ${c.alexMode === 'miroir' ? 'tireuses à l’envers' : 'commandes inversées'}, ${c.alexShot === 'impose' ? 'imposé' : 'au choix'}`;
+  const alex = !c.alexOn ? 'sans Michel' : `Michel : ${c.alexMode === 'miroir' ? 'postes à l’envers' : 'commandes inversées'}, ${c.alexShot === 'impose' ? 'imposé' : 'au choix'}`;
   const hugo = c.hugoOn ? 'Fabien' : 'sans Fabien';
   const jer = !c.jeremieOn ? 'sans Marie' : c.menu === 'hasard' ? 'Marie (menu au hasard)' : ({ alex: 'menu Michel', jeremie: 'menu Marie', tous: 'menu complet' })[c.menu];
   return [prep, tray, alex, hugo, jer];
@@ -822,12 +822,12 @@ const PANEL = [
   { key: 'prep', label: 'Préparation des boissons', type: 'seg', options: [['simple', 'Simple'], ['tirage', 'Tirage']], help: { simple: 'Toutes les boissons au toucher. Pur arcade.', tirage: 'Chocolat au maintien (parfait = bonus), matcha lancé puis repris.' } },
   { key: 'trayMax', label: 'Plateau de Etienne', type: 'seg', options: [[1, '1 verre'], [2, '2 verres'], [3, '3 verres']], help: { 1: 'Un verre à la fois, comme la version 1.', 2: 'Juste assez pour une commande double.', 3: 'De quoi servir plusieurs clients d’affilée.' } },
   { key: 'alexMode', label: 'Effet de Michel', type: 'seg', options: [['inversion', 'Commandes inversées'], ['miroir', 'Tireuses à l’envers']], help: { miroir: 'Les postes échangent leurs places. Les bulles restent vraies.', inversion: 'Les bulles se retournent : chocolat ⇄ matcha, expresso ⇄ croissant.' } },
-  { key: 'alexShot', label: 'La blague de Michel', type: 'seg', options: [['choix', 'Au choix'], ['impose', 'Imposé']], help: { impose: 'Michel débarque et fait boire Etienne, sans demander.', choix: 'Michel s’installe avec son plateau : touche-le pour trinquer, ou ignore-le.' } },
+  { key: 'alexShot', label: 'La blague de Michel', type: 'seg', options: [['choix', 'Au choix'], ['impose', 'Imposé']], help: { impose: 'Michel débarque et raconte sa blague, sans demander.', choix: 'Michel arrive avec sa blague : touche-le pour l’écouter, ou ignore-le.' } },
   { key: 'alexMult', label: 'Points pendant Michel', type: 'seg', options: [[1, '×1'], [1.5, '×1,5'], [2, '×2']] },
   { key: 'alexOn', label: 'Michel', type: 'toggle' },
   { key: 'hugoOn', label: 'Fabien', type: 'toggle' },
   { key: 'jeremieOn', label: 'Marie (contrôle qualité)', type: 'toggle' },
-  { key: 'menu', label: 'Événements de la partie', type: 'seg', options: [['hasard', 'Au hasard'], ['alex', 'Michel'], ['jeremie', 'Marie'], ['tous', 'Les trois']], help: { hasard: 'Fabien à chaque partie, plus Michel ou Marie (une chance sur deux). Jamais les trois.', alex: 'Michel et Fabien, comme avant.', jeremie: 'Marie passe deux fois (la seconde, pompette) et Fabien. Pas de Michel.', tous: 'Pour tester seulement : Marie tôt, puis Michel, puis Fabien. Le hasard ne le tire jamais.' } },
+  { key: 'menu', label: 'Événements de la partie', type: 'seg', options: [['hasard', 'Au hasard'], ['alex', 'Michel'], ['jeremie', 'Marie'], ['tous', 'Les trois']], help: { hasard: 'Fabien à chaque partie, plus Michel ou Marie (une chance sur deux). Jamais les trois.', alex: 'Michel et Fabien, comme avant.', jeremie: 'Marie passe deux fois (la seconde, affamée) et Fabien. Pas de Michel.', tous: 'Pour tester seulement : Marie tôt, puis Michel, puis Fabien. Le hasard ne le tire jamais.' } },
   { section: 'Rythme' },
   { key: 'duration', label: 'Durée de partie', type: 'seg', options: [[90, '90 s'], [120, '120 s']] },
   { key: 'difficulty', label: 'Cadence des clients', type: 'range', min: 0.6, max: 1.6, step: 0.05, fmt: (x) => '×' + fmtN(x) },
@@ -840,7 +840,7 @@ const PANEL = [
   { key: 'hugoDuration', label: 'Durée du rush de Fabien', type: 'range', min: 10, max: 30, step: 1, fmt: (x) => x + ' s' },
   { key: 'hugoTargetTirage', label: 'Objectif de Fabien, tirage', type: 'range', min: 6, max: 20, step: 1, fmt: (x) => x + ' boissons' },
   { key: 'hugoTargetSimple', label: 'Objectif de Fabien, simple', type: 'range', min: 6, max: 24, step: 1, fmt: (x) => x + ' boissons' },
-  { key: 'doubles', label: 'Commandes doubles (tables de potes)', type: 'toggle' },
+  { key: 'doubles', label: 'Commandes doubles (binômes de muscu)', type: 'toggle' },
   { section: 'Scènes de Michel et Fabien' },
   { key: 'explain', label: 'La première fois, attendre un toucher pour lire la règle', type: 'toggle' },
   { key: 'cutAlex', label: 'Durée de la scène de Michel ensuite', type: 'range', min: 1.5, max: 5, step: 0.1, fmt: (x) => fmtN(x.toFixed(1)) + ' s' },

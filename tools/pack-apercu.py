@@ -36,7 +36,7 @@ body::after {{ content: ""; position: absolute; left: 0; right: 0; bottom: 0; he
 /* Le défi en néon rose, comme l'enseigne « C'est ouvert » */
 .defi {{ right: 34px; font-size: 66px; letter-spacing: 0.04em; color: #FFE3EA; text-shadow: 0 0 2px #F39BB1, 0 0 10px #F39BB1, 0 0 22px rgba(243,155,177,0.8), 0 4px 0 #4A2230; }}
 </style>
-<p class="t logo">Galopins Arcade</p>
+<p class="t logo">Volta Arcade</p>
 <p class="t defi">Tu me bats ?</p>"""
 
 os.makedirs(os.path.dirname(CHECK), exist_ok=True)

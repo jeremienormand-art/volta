@@ -76,6 +76,7 @@ const Sfx = {
   alexHey() { this.tone(500, 0.35, 'sine', 0.14, 1400); },
   gulp() { this.tone(160, 0.12, 'sine', 0.22, 90, 0.7); this.tone(150, 0.12, 'sine', 0.2, 80, 0.9); this.tone(900, 0.06, 'sine', 0.12, 1500, 1.25); },
   stamp() { this.noise(0.07, 260, 1.2, 0.3, 'lowpass'); this.tone(120, 0.09, 'sine', 0.25, 70); },   // v1.26 : tampon de Jérémie
+  laugh() { [0, 0.11, 0.22].forEach((d, i) => this.tone(560 - i * 30, 0.08, 'triangle', 0.13, 760 - i * 30, d)); },   // Volta : Michel rit de sa blague
   hiccup() { this.tone(900, 0.06, 'sine', 0.08, 1500); },
   swap() { this.noise(0.25, 900, 1, 0.08, 'bandpass', 0, 2400); },
   hugoAlarm() { [0, 0.18, 0.36].forEach((d) => { this.tone(880, 0.12, 'square', 0.07, null, d); this.tone(660, 0.12, 'square', 0.07, null, d + 0.09); }); },

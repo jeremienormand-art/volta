@@ -379,7 +379,7 @@ function drawJeremieSeat(ctx, g, s, now) {
   const off = custOffset(s);
   const by = L.custBase + off;
   const shake = s.wrongT > 0 ? Math.sin(now * 50) * 3 * (s.wrongT / 0.6) : 0;
-  const sway = s.tipsy ? Math.sin(now * 1.7 + s.id) * 2.2 : 0;               // pompette, il tangue un peu
+  const sway = 0;   // Volta : Marie affamée ne tangue pas (Jérémie pompette tanguait)
   const bob = s.phase === 'approve' ? -Math.sin(Math.min(1, s.pt / 0.45) * Math.PI) * 7 : Math.sin(now * 2 + s.id) * 0.8;
   ctx.save();
   ctx.beginPath(); ctx.rect(x - 45, 0, 90, L.counterTop + 4); ctx.clip();

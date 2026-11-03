@@ -51,7 +51,7 @@ with sync_playwright() as pw:
     p.click('#sStoryGo'); p.wait_for_timeout(300)
     sh = p.evaluate('() => window.__shared')
     assert not vis(p, '#sStory'), 'aperçu pas refermé après le partage'
-    assert sh and sh['n'] == 1 and sh['type'] == 'image/jpeg' and sh['name'] == 'galopins-arcade-33450.jpg' and not sh['text'] and not sh['url'], sh
+    assert sh and sh['n'] == 1 and sh['type'] == 'image/jpeg' and sh['name'] == 'volta-arcade-33450.jpg' and not sh['text'] and not sh['url'], sh
     assert 'Story prête' in p.text_content('#eStoryL'), p.text_content('#eStoryL')
     dims = p.evaluate("""() => new Promise((ok) => { const i = new Image(); i.onload = () => ok([i.naturalWidth, i.naturalHeight]); i.src = window.__galopins.story.url; })""")
     assert dims == [1080, 1920], dims
@@ -61,7 +61,7 @@ with sync_playwright() as pw:
     # 2. Sans partage d'image : l'image s'affiche en grand, « Télécharger » et « Fermer »
     p.evaluate("() => { navigator.canShare = undefined; }")
     p.click('#eStory'); p.wait_for_timeout(300)
-    assert vis(p, '#sStory') and vis(p, '#sStoryHelp') and not vis(p, '#sStoryGo') and vis(p, '#sStoryDl') and p.get_attribute('#sStoryDl', 'download') == 'galopins-arcade-33450.jpg'
+    assert vis(p, '#sStory') and vis(p, '#sStoryHelp') and not vis(p, '#sStoryGo') and vis(p, '#sStoryDl') and p.get_attribute('#sStoryDl', 'download') == 'volta-arcade-33450.jpg'
     p.screenshot(path=f'{OUT}/story_{W}_repli.png')
     p.click('#sStoryClose'); p.wait_for_timeout(150)
     assert not vis(p, '#sStory')

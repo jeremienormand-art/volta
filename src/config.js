@@ -104,7 +104,7 @@ const DEFAULTS = {
   bonusEmptyBar: 300,
 
   // Confort et test
-  sway: true,               // tangage pendant l'effet d'Alex
+  sway: false,              // tangage pendant l'effet d'Alex (Volta : coupé, une blague ne fait pas tanguer la salle)
   sound: true,
   haptics: true,
   showZones: false,         // affiche les zones tactiles
