@@ -211,7 +211,7 @@ const Rank = {
   open(from) {
     this.back = from;
     // v1.45 : le gros bouton doré lance une partie, comme celui de l'écran d'où l'on vient
-    document.getElementById('bRankPlay').textContent = from === 'sEnd' ? 'Rejouer' : 'Ouvrir le bar';
+    document.getElementById('bRankPlay').textContent = from === 'sEnd' ? 'Rejouer' : 'Ouvrir le comptoir';
     showScreen('sRank');
     this.el.sRank.scrollTop = 0;
     this.show('semaine');

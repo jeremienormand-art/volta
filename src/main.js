@@ -264,7 +264,7 @@ function onEvent(e) {
       }
       if (e.fill !== undefined) { // verdict du tirage, là où le joueur regardait
         const at = V.gaugeAt || { x: stationX(g, 'ipa').x, y: L.stTop - 40 };
-        if (e.q === 'perfect') { Sfx.perfect(); floatText(at.x, at.y + 10, 'PARFAITE !', C.rose, 22, 1.1); setMood('proud', 0.8); }
+        if (e.q === 'perfect') { Sfx.perfect(); floatText(at.x, at.y + 10, 'PARFAIT !', C.rose, 22, 1.1); setMood('proud', 0.8); }
         else if (e.q === 'low') { Sfx.noGlass(); floatText(at.x, at.y + 10, 'PAS ASSEZ !', C.warn, 18, 1.1); setMood('oops', 0.8); if (Coach.learned.hold || !c.hints) say('Trop vide : remaintiens le chocolat !', 2, true); }
         else floatText(at.x, at.y + 10, e.topUp ? 'COMPLÉTÉE' : 'BIEN', C.creme, 16, 0.8);
       }

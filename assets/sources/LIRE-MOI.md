@@ -26,7 +26,7 @@ Outil : `python3 tools/pack-chatgpt.py` (équipe, accueil, cartons et décors ci
 - `boissons-volta.png` (Volta) — chocolat, matcha, expresso, croissant ; ligne du haut vide, du bas pleine (`tools/pack-boissons.py` → `assets/drinks/drinks.webp`).
 - `matcha-etapes.png` (Volta) — matcha en 6 étapes, dans la colonne de la stout (`tools/pack-stout.py` → `assets/drinks/stout-steps.webp`).
 - `classement.png` — médailles, trophée, couronne et lauriers (`tools/pack-rank.py`).
-- `salle-profonde.png` — salle du bar (redimensionnée et floutée avec Pillow, voir AGENTS.md).
+- `salle-profonde.png` — salle de Volta (v1.6), redimensionnée en 720 × 960 avec Pillow → `assets/room/room-depth.webp`.
 - `apercu.png` — image d'aperçu des liens partagés, paysage 3:2 sans texte (`tools/pack-apercu.py` → `dist/apercu.jpg`).
 
 ## Avant d'intégrer une nouvelle planche
