@@ -17,10 +17,10 @@ def pose(path, h, cx, flip=False, dim=1.0):
         a = np.array(im).astype(np.float32); a[..., :3] *= dim; im = Image.fromarray(a.astype(np.uint8))
     fond.alpha_composite(im, (round(cx - im.width / 2), TOP + 150 - h))
 
-pose('assets/characters/card-jeremie.webp', 560, 560, dim=0.9)            # Marie, en retrait
-pose('assets/characters/card-alex.webp', 640, 270)                         # Michel et sa blague
-pose('assets/characters/card-hugo.webp', 640, 1270, flip=True)             # Fabien et sa montre, tourné vers le centre
-pose('assets/characters/max-accueil.webp', 700, 840)                       # Etienne au centre
+pose('assets/characters/card-jeremie.webp', 540, 575, dim=0.92)           # Marie, en retrait, visage dégagé entre Michel et Etienne
+pose('assets/characters/card-alex.webp', 600, 195)                         # Michel et sa blague, à gauche
+pose('assets/characters/card-hugo.webp', 600, 1310, flip=True)             # Fabien et sa montre, tourné vers le centre
+pose('assets/characters/max-accueil.webp', 680, 905)                       # Etienne au centre
 
 bois = Image.open('assets/ui/service-wood.webp').convert('RGBA')
 bois = bois.resize((W, round(bois.height * W / bois.width)), Image.LANCZOS)
