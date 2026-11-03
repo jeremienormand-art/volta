@@ -11,7 +11,7 @@ const { DEFAULTS, Game, BOT_PROFILES, botDecide, mulberry32, lookPerson, mateOf,
 
 const N = +(process.argv[2] || 200);
 let spawns = 0, doublons = 0, friendSpawns = 0;
-const parPersonne = new Array(8).fill(0);
+const parPersonne = new Array(9).fill(0);
 for (let i = 0; i < N; i++) {
   const g = new Game(Object.assign({}, DEFAULTS, { hints: false }), (1234 + i * 7919) >>> 0);
   const prof = BOT_PROFILES.bon, r = mulberry32(99 + i);
