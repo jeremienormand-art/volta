@@ -41,7 +41,7 @@ with sync_playwright() as pw:
     assert vis(p, '#bInsta') and inview(p, '#bInsta'), 'néon pas visible sans défiler'
     assert not vis(p, '#eInsta'), 'pied de ticket en double'
     assert inview(p, '#bReplay') and inview(p, '#bShare'), 'Rejouer / Défier cachés'
-    assert vis(p, '#eModes'), 'mode test : caractéristiques attendues'
+    # Volta : plus de ligne des caractéristiques sur l'addition, même en test
     p.screenshot(path=f'{OUT}/insta_{tag}_fin.png')
     with ctx.expect_page() as pop:
         p.click('#bInsta')
@@ -71,7 +71,7 @@ with sync_playwright() as pw:
         if vis(p, '#sEnd'): break
     p.clock.run_for(3000)
     assert vis(p, '#sEnd'), 'partie publique pas terminée'
-    assert not vis(p, '#eModes'), 'public : caractéristiques encore affichées'
+    assert p.locator('#eModes').count() == 0, 'ligne des caractéristiques encore présente'
     assert vis(p, '#bInsta') and inview(p, '#bInsta'), 'public : néon absent'
     p.evaluate("() => { const s = document.getElementById('sEnd'); s.scrollTop = s.scrollHeight; }"); p.clock.run_for(300)
     p.screenshot(path=f'{OUT}/insta_{tag}_public_bas.png')

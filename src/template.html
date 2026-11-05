@@ -63,7 +63,7 @@
             <li><span class="t-ico t-ico-cust" aria-hidden="true"></span><b>Sers</b><small>le bon client</small></li>
           </ol>
           <p class="t-note">La première fois, Etienne te guide geste par geste. Le chrono attend.</p>
-          <button type="button" id="bStart" class="primary t-go">Ouvrir le comptoir</button>
+          <button type="button" id="bStart" class="primary t-go">{{ouvrir}}</button>
           <div class="t-foot">
             <p id="tBest" class="t-best"></p>
             <button type="button" id="bRank" class="t-rank" hidden><span class="t-trophy" aria-hidden="true"></span><span class="t-rank-l">Top de la semaine</span><span class="t-rank-s" aria-hidden="true">Top 10</span></button>
@@ -135,12 +135,7 @@
                 <button type="button" id="eRankReset" class="r-link" hidden>Remettre les réglages par défaut</button>
               </div>
             </section>
-            <p class="r-ask">Ton avis sur la partie</p>
-            <div id="eRate" class="r-boxes" role="group" aria-label="Ton avis sur la partie">
-              <button type="button" data-r="bof" aria-pressed="false">Bof</button>
-              <button type="button" data-r="bien" aria-pressed="false">Bien</button>
-              <button type="button" data-r="top" aria-pressed="false">Top</button>
-            </div>
+            <!-- Volta : plus d'avis Bof / Bien / Top sur l'addition (demande de Jérémie) -->
             <p class="r-thanks">Merci, à demain !</p>
             <!-- v1.38 : pied du ticket, le compte Instagram du bar (ouvre l'appli Instagram si elle est installée).
                  v1.39 : seulement après un premier toucher du néon de la barre du bas (rappel discret). -->
@@ -148,7 +143,6 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5a2 2 0 0 1 2-2h2.6l1.6-2.5h5.6l1.6 2.5H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13.6" r="3.7"/></svg>
               <span><small>Suis-nous sur Instagram</small><b>@{{insta}}</b></span>
             </a>
-            <p id="eModes" class="r-fine"></p>
           </article>
         </div>
         <!-- v1.24 : barre collée en bas de l'écran, l'addition défile derrière (Rejouer toujours visible) -->
@@ -194,7 +188,7 @@
       <div class="t-bar k-bar">
         <div class="k-row">
           <button type="button" id="bRankBack" class="t-rank p-btn">Retour</button>
-          <button type="button" id="bRankPlay" class="primary t-go">Ouvrir le comptoir</button>
+          <button type="button" id="bRankPlay" class="primary t-go">{{ouvrir}}</button>
         </div>
       </div>
     </section>

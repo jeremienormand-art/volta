@@ -28,6 +28,7 @@ Identiques à Galopins au 2 novembre 2026 : voir `docs/galopins-AGENTS.md` (sect
 Avant d'enregistrer : `node build.mjs`, `node test/sim.mjs 50`, `node test/rejeu.mjs 100`.
 
 ## Publier
-- Cloudflare : Worker `volta` (nom identique dans `wrangler.jsonc`), branché sur ce dépôt par Workers Builds (Jérémie le branche dans le tableau de bord) ; adresse prévue https://volta.jeremie-normand.workers.dev. Chaque enregistrement sur `main` met en ligne.
+- Cloudflare : sur le compte d'Anaïs (choix du 5 novembre 2026), Worker `volta` (nom identique dans `wrangler.jsonc`), branché sur ce dépôt par Workers Builds en autorisant le GitHub de Jérémie depuis son tableau de bord. Une fois l'adresse connue (`volta.<sous-domaine d'Anaïs>.workers.dev` ou un domaine à elle), la reporter dans `THEME.urlPublique` (`src/theme.js`) ; elle doit contenir « volta » (`THEME.motPublic`), sinon le jeu s'ouvre en mode test. Chaque enregistrement sur `main` met en ligne.
+- Addition (v1.12, 5 novembre 2026, demande de Jérémie) : plus de ligne des réglages ni d'avis Bof / Bien / Top, même en test ; gros bouton « Ouvrir le Volta » (`THEME.ouvrir`).
 - Classement : base D1 `volta-scores` à créer par Jérémie, puis décommenter la liaison dans `wrangler.jsonc` avec son identifiant. Sans elle, le jeu marche et le classement se cache.
 - Page de test claude.ai de Volta : https://claude.ai/artifact/NXu5bxmxdXEdf9PmLZsY44 (republier `dist/galopins-arcade.html` sur cette URL, paramètre `url`). Jamais l'artifact de Galopins.

@@ -603,7 +603,7 @@ html, body { overscroll-behavior: none; }
             <li><span class="t-ico t-ico-cust" aria-hidden="true"></span><b>Sers</b><small>le bon client</small></li>
           </ol>
           <p class="t-note">La première fois, Etienne te guide geste par geste. Le chrono attend.</p>
-          <button type="button" id="bStart" class="primary t-go">Ouvrir le comptoir</button>
+          <button type="button" id="bStart" class="primary t-go">Ouvrir le Volta</button>
           <div class="t-foot">
             <p id="tBest" class="t-best"></p>
             <button type="button" id="bRank" class="t-rank" hidden><span class="t-trophy" aria-hidden="true"></span><span class="t-rank-l">Top de la semaine</span><span class="t-rank-s" aria-hidden="true">Top 10</span></button>
@@ -675,12 +675,7 @@ html, body { overscroll-behavior: none; }
                 <button type="button" id="eRankReset" class="r-link" hidden>Remettre les réglages par défaut</button>
               </div>
             </section>
-            <p class="r-ask">Ton avis sur la partie</p>
-            <div id="eRate" class="r-boxes" role="group" aria-label="Ton avis sur la partie">
-              <button type="button" data-r="bof" aria-pressed="false">Bof</button>
-              <button type="button" data-r="bien" aria-pressed="false">Bien</button>
-              <button type="button" data-r="top" aria-pressed="false">Top</button>
-            </div>
+            <!-- Volta : plus d'avis Bof / Bien / Top sur l'addition (demande de Jérémie) -->
             <p class="r-thanks">Merci, à demain !</p>
             <!-- v1.38 : pied du ticket, le compte Instagram du bar (ouvre l'appli Instagram si elle est installée).
                  v1.39 : seulement après un premier toucher du néon de la barre du bas (rappel discret). -->
@@ -688,7 +683,6 @@ html, body { overscroll-behavior: none; }
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5a2 2 0 0 1 2-2h2.6l1.6-2.5h5.6l1.6 2.5H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13.6" r="3.7"/></svg>
               <span><small>Suis-nous sur Instagram</small><b>@</b></span>
             </a>
-            <p id="eModes" class="r-fine"></p>
           </article>
         </div>
         <!-- v1.24 : barre collée en bas de l'écran, l'addition défile derrière (Rejouer toujours visible) -->
@@ -734,7 +728,7 @@ html, body { overscroll-behavior: none; }
       <div class="t-bar k-bar">
         <div class="k-row">
           <button type="button" id="bRankBack" class="t-rank p-btn">Retour</button>
-          <button type="button" id="bRankPlay" class="primary t-go">Ouvrir le comptoir</button>
+          <button type="button" id="bRankPlay" class="primary t-go">Ouvrir le Volta</button>
         </div>
       </div>
     </section>
@@ -804,6 +798,7 @@ const THEME = {
   enseigne: 'VOLTA',                   // titre en capitales de la story
   adresse: '',                         // adresse sur la story (vide : pas de ligne)
   insta: '',                           // compte Instagram sans le @ (vide : pas de néon ni de tag Instagram)
+  ouvrir: 'Ouvrir le Volta',          // gros bouton de l'accueil et du top 10
   emoji: '☕',                          // à la fin du message « Tu me bats ? »
   // Adresse publique (celle du QR code) et mot de son nom qui active le mode public
   urlPublique: 'https://volta.jeremie-normand.workers.dev/',
@@ -4160,7 +4155,7 @@ const Rank = {
   open(from) {
     this.back = from;
     // v1.45 : le gros bouton doré lance une partie, comme celui de l'écran d'où l'on vient
-    document.getElementById('bRankPlay').textContent = from === 'sEnd' ? 'Rejouer' : 'Ouvrir le comptoir';
+    document.getElementById('bRankPlay').textContent = from === 'sEnd' ? 'Rejouer' : THEME.ouvrir;
     showScreen('sRank');
     this.el.sRank.scrollTop = 0;
     this.show('semaine');
@@ -5046,9 +5041,7 @@ function fillEnd(e, rec) {
   if (e.alexOn && e.alexPasses) rows.push(['Blague de Michel', e.alexIgnored && e.alexIgnored >= e.alexPasses ? 'refusée' : e.alexClean ? `zéro faute +${e.alexClean}` : `${e.alexErrors} erreur${e.alexErrors > 1 ? 's' : ''}`]);
   $('eStats').innerHTML = rows.map(([k, v]) => `<div class="r-line"><dt>${k}</dt><dd>${v}</dd></div>`).join('');
   // v1.39 : les caractéristiques de la partie ne servent qu'aux testeurs (en public, les règles sont toujours celles par défaut)
-  $('eModes').textContent = TEST ? modeLabel(cfg).join(' · ') : '';
-  $('eModes').hidden = !TEST;
-  for (const b of document.querySelectorAll('#eRate button')) b.setAttribute('aria-pressed', 'false');
+  // Volta : plus de ligne des réglages ni d'avis sur l'addition, même en test (demande de Jérémie)
   lastEnd = e;
   lastEnd.rec = !!rec;   // v1.40 : le tampon « Nouveau record » aussi sur l'image de story
   fillDefi(e);
@@ -5199,11 +5192,6 @@ async function shareScore() {
   }
   flashShare(ok ? 'Lien copié !' : 'Copie bloquée');
 }
-$('eRate').addEventListener('click', (ev) => {
-  const b = ev.target.closest('button'); if (!b) return;
-  for (const x of document.querySelectorAll('#eRate button')) x.setAttribute('aria-pressed', String(x === b));
-  if (history[0]) { history[0].rating = b.dataset.r; store.set('history', history); }
-});
 
 $('bStart').addEventListener('click', startGame);
 $('bReplay').addEventListener('click', startGame);

@@ -11,6 +11,7 @@ const THEME = {
   enseigne: 'VOLTA',                   // titre en capitales de la story
   adresse: '',                         // adresse sur la story (vide : pas de ligne)
   insta: '',                           // compte Instagram sans le @ (vide : pas de néon ni de tag Instagram)
+  ouvrir: 'Ouvrir le Volta',          // gros bouton de l'accueil et du top 10
   emoji: '☕',                          // à la fin du message « Tu me bats ? »
   // Adresse publique (celle du QR code) et mot de son nom qui active le mode public
   urlPublique: 'https://volta.jeremie-normand.workers.dev/',

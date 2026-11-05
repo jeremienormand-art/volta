@@ -634,9 +634,7 @@ function fillEnd(e, rec) {
   if (e.alexOn && e.alexPasses) rows.push(['Blague de Michel', e.alexIgnored && e.alexIgnored >= e.alexPasses ? 'refusée' : e.alexClean ? `zéro faute +${e.alexClean}` : `${e.alexErrors} erreur${e.alexErrors > 1 ? 's' : ''}`]);
   $('eStats').innerHTML = rows.map(([k, v]) => `<div class="r-line"><dt>${k}</dt><dd>${v}</dd></div>`).join('');
   // v1.39 : les caractéristiques de la partie ne servent qu'aux testeurs (en public, les règles sont toujours celles par défaut)
-  $('eModes').textContent = TEST ? modeLabel(cfg).join(' · ') : '';
-  $('eModes').hidden = !TEST;
-  for (const b of document.querySelectorAll('#eRate button')) b.setAttribute('aria-pressed', 'false');
+  // Volta : plus de ligne des réglages ni d'avis sur l'addition, même en test (demande de Jérémie)
   lastEnd = e;
   lastEnd.rec = !!rec;   // v1.40 : le tampon « Nouveau record » aussi sur l'image de story
   fillDefi(e);
@@ -787,11 +785,6 @@ async function shareScore() {
   }
   flashShare(ok ? 'Lien copié !' : 'Copie bloquée');
 }
-$('eRate').addEventListener('click', (ev) => {
-  const b = ev.target.closest('button'); if (!b) return;
-  for (const x of document.querySelectorAll('#eRate button')) x.setAttribute('aria-pressed', String(x === b));
-  if (history[0]) { history[0].rating = b.dataset.r; store.set('history', history); }
-});
 
 $('bStart').addEventListener('click', startGame);
 $('bReplay').addEventListener('click', startGame);
