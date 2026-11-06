@@ -428,7 +428,7 @@ function onEvent(e) {
       else if (e.tier === 3) { banner('OBJECTIF TENU !', med, 'blanc', 2, { face: hugoFace('proud'), medal: 3 }); Sfx.win(); setMood('proud', 1.2); }
       else if (e.tier === 2) { banner('PAS MAL !', med, 'blanc', 2, { face: hugoFace('idle'), medal: 2 }); Sfx.ready(); setMood('happy', 1); }
       else if (e.tier === 1) { banner('ÇA PASSE…', med, 'blanc', 2, { face: hugoFace('idle'), medal: 1 }); Sfx.ready(); setMood('oops', 1); }
-      else { banner('FABIEN SOUPIRE…', `${e.served} / ${e.target} boissons`, 'faible', 2.1, { face: hugoFace('sad') }); Sfx.fail(); setMood('sad', 1.2); }
+      else { banner('FABIEN SOUPIRE…', `${e.served} / ${e.target} commandes`, 'faible', 2.1, { face: hugoFace('sad') }); Sfx.fail(); setMood('sad', 1.2); }
       break;
     case 'pace': { // palier de difficulté : Max le sent passer (sauf pendant Alex et Hugo, qui parlent déjà)
       if (g.eventBusy()) break;
@@ -621,7 +621,7 @@ function fillEnd(e, rec) {
   const d = new Date(e.at || Date.now()), two = (n) => String(n).padStart(2, '0');
   $('eMeta').textContent = `Service du ${two(d.getDate())}/${two(d.getMonth() + 1)} à ${two(d.getHours())}h${two(d.getMinutes())} · barista : Etienne`;
   const rows = [
-    ['Boissons servies', e.drinks],
+    ['Commandes servies', e.drinks],
     ...(e.prep === 'tirage' ? [['Chocolats parfaits', e.perfect]] : []),
     ...(e.refused ? [['Chocolats trop vides', e.refused]] : []),
     ['Erreurs', e.errors],
@@ -668,7 +668,7 @@ function instaTapped() {
 // Instagram ne laisse pas pré-taguer un compte : le @ est écrit sur l'image et le bouton rappelle de taguer.
 // Sans partage d'image (ordinateur, page claude.ai, vieux navigateur) : l'image s'affiche, appui long pour l'enregistrer.
 function storyInfo(e) {
-  const rows = [['Boissons servies', e.drinks]];
+  const rows = [['Commandes servies', e.drinks]];
   if (e.prep === 'tirage') rows.push(['Chocolats parfaits', e.perfect]);
   rows.push(['Meilleur combo', e.combo]);
   if (e.hugo) rows.push(['Visite client', `${e.hugo} ${e.hugoPerfect ? 'or' : ['raté', 'bronze', 'argent', 'or'][e.hugoTier || 0]}`]);

@@ -539,7 +539,7 @@ function drawEventStrip(ctx, g, cfg, now) {
     drawCharacterFace(ctx, 12, y + 2, 38, h - 4, HUGO_SPEC, {mood: hugoMood(g)});
     text(ctx, 'VISITE CLIENT', 54, titleY, 11, C.creme, {weight:800,align:'left'});
     // v1.25 : la médaille déjà gagnée, et le palier suivant tant qu'on n'est pas à l'argent
-    const detail = tier < 2 ? `${hugo.served} / ${hugo.target} · ${TIER_NAME[tier + 1]} à ${hugo.tiers[tier]}` : `${hugo.served} / ${hugo.target} boissons`;
+    const detail = tier < 2 ? `${hugo.served} / ${hugo.target} · ${TIER_NAME[tier + 1]} à ${hugo.tiers[tier]}` : `${hugo.served} / ${hugo.target} commandes`;
     text(ctx, detail, 54, detailY, 12, done ? C.good : C.cremeD, {weight:800,align:'left'});
     drawMedal(ctx, tier, 236, y + (compact ? 3 : 9), compact ? 28 : 32);
     drawEventTimer(ctx, hugo.end - g.t, cfg.hugoDuration, 278, timerY, timerH);
@@ -899,10 +899,10 @@ function drawCut(ctx, g, cfg, cut, now) {
   } else {
     const n = String(g.hugo.target);
     ctx.font = `400 92px ${FONT_P}`; const nw = ctx.measureText(n).width;
-    ctx.font = `400 38px ${FONT_P}`; const lw = Math.max(ctx.measureText('BOISSONS').width, 112);
+    ctx.font = `400 38px ${FONT_P}`; const lw = Math.max(ctx.measureText('COMMANDES').width, 112);
     const x0 = 180 - (nw + 14 + lw) / 2;
     text(ctx, n, x0, sy + 102, 92, C.gold, { pixel: true, align: 'left' });
-    text(ctx, 'BOISSONS', x0 + nw + 14, sy + 66, 38, C.creme, { pixel: true, align: 'left' });
+    text(ctx, 'COMMANDES', x0 + nw + 14, sy + 66, 38, C.creme, { pixel: true, align: 'left' });
     text(ctx, `en ${cfg.hugoDuration} secondes`, x0 + nw + 15, sy + 92, 15, C.creme, { weight: 800, align: 'left' });
     // v1.25 : les trois paliers sous la demande, avec les médailles du classement
     ctx.font = `800 14px ${FONT_T}`;
