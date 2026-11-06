@@ -10,9 +10,8 @@
     "directory": "./dist",
     "binding": "ASSETS"
   },
-  // Classement : à brancher quand la base `volta-scores` existe (Jérémie la crée dans le tableau de bord Cloudflare,
-  // puis colle ici son identifiant). Sans elle, le jeu marche et le classement reste caché.
-  // "d1_databases": [{ "binding": "DB", "database_name": "volta-scores", "database_id": "…" }],
+  // Classement : base D1 `volta-scores` sur le compte Cloudflare d'Anaïs (6 novembre 2026)
+  "d1_databases": [{ "binding": "DB", "database_name": "volta-scores", "database_id": "dd74cc0b-7486-49f7-8050-aca1bd5c3cc7" }],
   // v1.30 : anti-triche. « observer » : chaque partie classée est rejouée après la réponse et notée (bilan : /api/rejeu) ;
   // « exiger » : score refusé si le rejeu ne donne pas le même ; « off » : pas de rejeu.
   "vars": { "REJEU": "observer" },
