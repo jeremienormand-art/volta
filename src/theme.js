@@ -14,6 +14,6 @@ const THEME = {
   ouvrir: 'Ouvrir le Volta',          // gros bouton de l'accueil et du top 10
   emoji: '☕',                          // à la fin du message « Tu me bats ? »
   // Adresse publique (celle du QR code) et mot de son nom qui active le mode public
-  urlPublique: 'https://volta.jeremie-normand.workers.dev/',
+  urlPublique: 'https://volta.faucon-anais.workers.dev/',
   motPublic: 'volta',
 };
