@@ -293,10 +293,10 @@ function onEvent(e) {
     }
     case 'stoutLaunch':
       Sfx.launch();
-      if (c.hints && !flags.hintStout && !coachStep(g, c)) { flags.hintStout = true; say('Elle repose : sers les autres !', 1.8, true); }
+      if (c.hints && !flags.hintStout && !coachStep(g, c)) { flags.hintStout = true; say('Il infuse : sers les autres !', 1.8, true); }
       break;
     case 'stoutReady': Sfx.ready(); break;
-    case 'stoutBusy': Sfx.busy(); V.press.bad = V.now; say('Elle repose !', 0.8); break;
+    case 'stoutBusy': Sfx.busy(); V.press.bad = V.now; say('Il infuse !', 0.8); break;
     case 'serve': {
       friendEvent(e, g.seats[e.seat]);
       Sfx.clink(Math.min(4, Math.floor(e.combo / 5))); Sfx.coin(e.mult); Haptics.buzz(10);
@@ -813,7 +813,7 @@ const fmtN = (x) => String(x).replace('.', ',');
 const PANEL = [
   { section: 'Mécaniques à comparer', note: 'Change un réglage, joue deux ou trois parties, note ton ressenti à la fin. L’historique en bas garde la trace.' },
   { key: 'prep', label: 'Préparation des boissons', type: 'seg', options: [['simple', 'Simple'], ['tirage', 'Tirage']], help: { simple: 'Toutes les boissons au toucher. Pur arcade.', tirage: 'Chocolat au maintien (parfait = bonus), matcha lancé puis repris.' } },
-  { key: 'trayMax', label: 'Plateau de Etienne', type: 'seg', options: [[1, '1 verre'], [2, '2 verres'], [3, '3 verres']], help: { 1: 'Un verre à la fois, comme la version 1.', 2: 'Juste assez pour une commande double.', 3: 'De quoi servir plusieurs clients d’affilée.' } },
+  { key: 'trayMax', label: 'Plateau d’Etienne', type: 'seg', options: [[1, '1 verre'], [2, '2 verres'], [3, '3 verres']], help: { 1: 'Un verre à la fois, comme la version 1.', 2: 'Juste assez pour une commande double.', 3: 'De quoi servir plusieurs clients d’affilée.' } },
   { key: 'alexMode', label: 'Effet de Michel', type: 'seg', options: [['inversion', 'Commandes inversées'], ['miroir', 'Tireuses à l’envers']], help: { miroir: 'Les postes échangent leurs places. Les bulles restent vraies.', inversion: 'Les bulles se retournent : chocolat ⇄ matcha, expresso ⇄ croissant.' } },
   { key: 'alexShot', label: 'La blague de Michel', type: 'seg', options: [['choix', 'Au choix'], ['impose', 'Imposé']], help: { impose: 'Michel débarque et raconte sa blague, sans demander.', choix: 'Michel arrive avec sa blague : touche-le pour l’écouter, ou ignore-le.' } },
   { key: 'alexMult', label: 'Points pendant Michel', type: 'seg', options: [[1, '×1'], [1.5, '×1,5'], [2, '×2']] },
