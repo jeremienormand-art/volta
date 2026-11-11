@@ -232,10 +232,11 @@ const TALK = {
     wrong: 'Tout le monde a un plan… jusqu’au premier coup.', left: 'J’encaisse… et j’avance.',
   },
   helene: {
-    first: 'Hélène, RH. T’as deux minutes ?', reply: 'Euh… c’est pour mon entretien annuel ?',
-    again: ['On cale un point d’étape ?', 'Pense à poser tes RTT !', 'Je reviens vers toi.', 'Ici, on est une famille.'],
-    served: ['Je note ça pour ton entretien annuel.', 'Ça mérite une prime… symbolique.', 'Avantage en nature validé.', 'Merci pour ton engagement !'],
-    wrong: 'Je vais devoir faire remonter ça.', left: 'J’ai un onboarding, je file !',
+    // v1.22 : RH bienveillante (Hélène doit pouvoir jouer sans le prendre mal) : elle repère les talents, prend soin de l'équipe
+    first: 'Hélène, RH. Je repère les talents !', reply: 'Alors regarde bien ce service !',
+    again: ['Pense à poser tes RTT !', 'Qualité de vie au travail : validée !', 'Toujours en recherche de talents !'],
+    served: ['Compétence validée !', 'Avantage en nature validé !', 'Ça, c’est du savoir-faire !', 'Bel esprit d’équipe !'],
+    wrong: 'On dit que c’est un axe de progrès ?', left: 'J’ai un onboarding, je file !',
   },
 };
 function linesOf(s) { const f = s && !s.isAlex ? friendOf(s.look) : null; return f ? TALK[f.key] : null; }
