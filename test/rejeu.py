@@ -61,8 +61,8 @@ with sync_playwright() as p:
     pg2.goto(URL); pg2.evaluate("localStorage.clear(); localStorage.setItem('ga1.cfg2', JSON.stringify({hints:false}))"); pg2.reload(); pg2.wait_for_timeout(1500)
     play(pg2, honnete=False)
     pg2.click('#eName'); pg2.keyboard.type(NOM); pg2.click('#eRankGo'); pg2.wait_for_timeout(2500)
-    print('3. même nom sur un autre téléphone :', pg2.inner_text('#eRankMsg'), '| formulaire revenu :', pg2.is_visible('#eName'))
-    pg2.locator('#eRank').scroll_into_view_if_needed()
+    print('3. même nom sur un autre téléphone :', pg2.inner_text('#eJoinMsg'), '| formulaire revenu :', pg2.is_visible('#eName'))
+    pg2.locator('#eRankForm').scroll_into_view_if_needed()   # v1.52 : le nom se demande sous le total
     pg2.screenshot(path=str(out / 'rejeu_nom_pris.png'))
 
     pg.wait_for_timeout(2000)

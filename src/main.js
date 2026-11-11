@@ -230,6 +230,19 @@ function drain() {
   while (g.events.length) { const evs = g.events.splice(0); for (const e of evs) onEvent(e); }
 }
 function seatTop() { return L.bubbleY - 36; }
+// v1.60 : un ami qui parle (Nico, Jérémie) a sa bulle juste au-dessus de sa commande : les points partent au-dessus d'elle.
+function talkTop(seat) {
+  const s = g && g.seats[seat], b = s && V.talk.find((t) => t.id === s.id);
+  if (!b) return null;
+  ctx.save(); ctx.font = `800 12.5px ${FONT_T}`;
+  const n = splitLine(ctx, b.text, 150).length;
+  ctx.restore();
+  return Math.max(L.hudH + 40, L.bubbleY - 41 - (b.lift || 0) - (16 + n * 15)) - 5;
+}
+// Verdict du tirage : au milieu de l'ardoise du combo (là où était la jauge), sur une pastille sombre, sans monter sur la bulle de Max.
+function pullVerdict(s, color, size, dur) {
+  floatText(BAND.comboX + BAND.comboW / 2, L.maxTop + BAND.modY + BAND.modH / 2 + 8, s, color, size, dur, { rise: 5, plate: true });
+}
 function firstTime(key) {
   if (!cfg.explain || seen[key]) return false;
   seen[key] = true; store.set('seen2', seen);
@@ -264,9 +277,9 @@ function onEvent(e) {
       }
       if (e.fill !== undefined) { // verdict du tirage, là où le joueur regardait
         const at = V.gaugeAt || { x: stationX(g, 'ipa').x, y: L.stTop - 40 };
-        if (e.q === 'perfect') { Sfx.perfect(); floatText(at.x, at.y + 10, 'PARFAIT !', C.rose, 22, 1.1); setMood('proud', 0.8); }
-        else if (e.q === 'low') { Sfx.noGlass(); floatText(at.x, at.y + 10, 'PAS ASSEZ !', C.warn, 18, 1.1); setMood('oops', 0.8); if (Coach.learned.hold || !c.hints) say('Trop vide : remaintiens le chocolat !', 2, true); }
-        else floatText(at.x, at.y + 10, e.topUp ? 'COMPLÉTÉE' : 'BIEN', C.creme, 16, 0.8);
+        if (e.q === 'perfect') { Sfx.perfect(); pullVerdict('PARFAIT !', C.rose, 19, 1.1); setMood('proud', 0.8); }
+        else if (e.q === 'low') { Sfx.noGlass(); pullVerdict('PAS ASSEZ !', C.warn, 18, 1.1); setMood('oops', 0.8); if (Coach.learned.hold || !c.hints) say('Trop vide : remaintiens le chocolat !', 2, true); }
+        else pullVerdict(e.topUp ? 'COMPLÉTÉ' : 'BIEN', C.creme, 18, 0.8);
       }
       if (c.hints && !flags.hintPick && Coach.learned.serve && g.seats.some((s) => s && s.tuto)) {
         flags.hintPick = true;
@@ -306,8 +319,9 @@ function onEvent(e) {
         const dx = e.n > 1 ? (i - (e.n - 1) / 2) * 22 : 0;
         V.flys.push({ kind: 'serve', seat: e.seat, drink: e.drinks[i], fill: e.fills ? e.fills[i] : 1, dx, x0: traySlotX(from.cx, k, max), y0: from.by - 2, x1: x + dx, y1: L.counterTop + 9, s0: 1.1, s1: 1, t: 0, dur: 0.15 });
       });
-      floatText(x, seatTop(), '+' + e.pts, e.ev > 1 ? C.rose : C.creme, 17);
-      if (e.perfects) floatText(x, seatTop() + 24, 'PARFAIT', C.rose, 12, 0.9);
+      const tt = talkTop(e.seat);   // v1.60 : au-dessus de la bulle de l'ami qui remercie
+      floatText(x, tt === null ? seatTop() : tt - (e.perfects ? 20 : 0), '+' + e.pts, e.ev > 1 ? C.rose : C.creme, 17);
+      if (e.perfects) floatText(x, tt === null ? seatTop() + 24 : tt, 'PARFAIT', C.rose, 12, 0.9);
 
       V.max.bounce = 1;
       setMood(e.perfects ? 'proud' : 'happy', 0.5);
@@ -324,7 +338,7 @@ function onEvent(e) {
     case 'wrong': {
       friendEvent(e, g.seats[e.seat]);
       Sfx.wrong(); Haptics.buzz(40);
-      floatText(L.seatX[e.seat], seatTop(), '−' + e.pen, C.bad, 17);
+      { const tt = talkTop(e.seat); floatText(L.seatX[e.seat], tt === null ? seatTop() : tt, '−' + e.pen, C.bad, 17); }
       setMood('oops', 0.9); V.max.shake = 1; V.shake = 0.5;
       say(pick(['Pas pour lui !', 'Il veut autre chose…', 'Mauvais client !', 'Ah. Pardon.']), 1, true);
       break;
@@ -332,7 +346,7 @@ function onEvent(e) {
     case 'left':
       friendEvent(e, g.seats[e.seat]);
       Sfx.left(); Haptics.buzz(25);
-      floatText(L.seatX[e.seat], seatTop(), '−' + e.pen, C.bad, 17);
+      { const tt = talkTop(e.seat); floatText(L.seatX[e.seat], tt === null ? seatTop() : tt, '−' + e.pen, C.bad, 17); }
       setMood('sad', 1); say(pick(['Il est parti…', 'Reviens !', 'Ça fait mal.']), 1.1, true);
       break;
     case 'noGlass': Sfx.noGlass(); say('Prends une commande d’abord !', 1, true); break;
@@ -473,20 +487,22 @@ function gameOver() {
   Sfx.pullStop(); Sfx.shutter();
   if (P.id !== null) { P.id = null; P.mode = null; V.drag = null; V.pullAt = null; }
   const key = cfg.prep;
-  const rec = g.score > (best[key] || 0);
-  if (rec) { best[key] = g.score; store.set('best16', best); }
+  const prev = best[key] || 0;   // v1.51 : ancien record du téléphone, pour l'accroche de l'addition
+  if (g.score > prev) { best[key] = g.score; store.set('best16', best); }
+  // v1.52 : pas de tampon « Nouveau record » à la toute première partie (rien à battre) : la place va à l'inscription du nom
+  const rec = prev > 0 && g.score > prev;
   const s = g.stats;
   const entry = {
     v: 2, at: new Date().toISOString(), score: g.score, prep: cfg.prep, trayMax: cfg.trayMax, alexMode: cfg.alexMode, alexShot: cfg.alexShot,
     alexOn: cfg.alexOn, hugoOn: cfg.hugoOn, duration: cfg.duration, drinks: s.drinks, errors: s.errors, left: s.left,
     perfect: s.perfect, combo: g.bestCombo, hugo: s.hugoPlayed ? `${s.hugoServed}/${s.hugoTarget}` : null,
     hugoOk: s.hugoReached, hugoPerfect: s.hugoPerfect, hugoTier: s.hugoTier, alexPasses: s.alexPasses, alexErrors: s.alexErrors, alexClean: s.alexClean || 0,
-    alexIgnored: s.alexIgnored, rating: null, difficulty: cfg.difficulty, refused: s.refused, low: s.low, learnPause: Math.round(s.learnPause),
+    alexIgnored: s.alexIgnored, difficulty: cfg.difficulty, refused: s.refused, low: s.low, learnPause: Math.round(s.learnPause),
     menu: g.menu, jeremie: s.jeremieVerdicts.slice(),
   };
   history.unshift(entry); history = history.slice(0, 30); store.set('history', history);
   const gm = g, gc = cfg;
-  setTimeout(() => { if (g !== gm) return; Sfx.print(); if (rec) setTimeout(() => Sfx.record(), 1000); fillEnd(entry, rec); Rank.onEnd(gm, gc); showScreen('sEnd'); screen = 'over'; $('hud').hidden = true; }, 1500);
+  setTimeout(() => { if (g !== gm) return; Sfx.print(); if (rec) setTimeout(() => Sfx.record(), 1000); fillEnd(entry, rec, prev); Rank.onEnd(gm, gc); fillHook(); showScreen('sEnd'); screen = 'over'; $('hud').hidden = true; }, 1500);
 }
 // ── Geste « retour » (v1.10) ──
 // Pendant une partie, l'adresse prend #partie (une entrée d'historique). Un retour accidentel (bord de l'écran,
@@ -587,9 +603,11 @@ function modeLabel(c) {
 function fillTitle() {
   const c = settings, tray = (c.trayMax || 1) > 1;
   const b = best[c.prep] || 0;
-  $('tBest').innerHTML = b
-    ? `<span class="t-star" aria-hidden="true"></span>Ton record${c.prep === 'simple' ? ' (simple)' : ''} <strong>${b.toLocaleString('fr-FR')}</strong>`
-    : 'Pas encore de record';
+  // v1.59 : le record en chiffres à côté du bouton de la pinte ; la phrase de première fois disparaît dès qu'il y a un record
+  $('tBestL').firstChild.textContent = c.prep === 'simple' ? 'Record (simple)' : 'Record';
+  $('tBestN').textContent = b ? b.toLocaleString('fr-FR') : '';
+  $('tBest').hidden = !b;
+  $('tNote').hidden = !!b;
   $('tStep2').textContent = tray ? 'le plateau' : 'le verre';
   const dur = c.duration || 120;   // v1.17 : Max ne dévoile plus la montée par paliers, le joueur la découvre en jouant
   $('tSay').textContent = `${dur >= 120 ? 'Deux minutes' : dur + ' secondes'} de service. Le comptoir va vite se remplir !`;
@@ -615,7 +633,7 @@ function fillMode() {
   const el = $('pMode');
   if (el) el.innerHTML = modeLabel(settings).map((m) => `<span class="chip">${m}</span>`).join('');
 }
-function fillEnd(e, rec) {
+function fillEnd(e, rec, prev) {
   $('eScore').textContent = e.score.toLocaleString('fr-FR');
   $('eRecord').hidden = !rec;
   const d = new Date(e.at || Date.now()), two = (n) => String(n).padStart(2, '0');
@@ -637,6 +655,9 @@ function fillEnd(e, rec) {
   // Volta : plus de ligne des réglages ni d'avis sur l'addition, même en test (demande de Jérémie)
   lastEnd = e;
   lastEnd.rec = !!rec;   // v1.40 : le tampon « Nouveau record » aussi sur l'image de story
+  lastEnd.prev = prev || 0;
+  lastEnd.shownAt = performance.now();
+  $('bReplay').textContent = 'Rejouer'; $('bReplay').classList.remove('long');   // v1.52 : « Rejouer quand même » ne dure que le temps d'une addition
   fillDefi(e);
   resetShare();
   fillInsta();
@@ -746,6 +767,81 @@ function fillDefi(e) {
     : diff === 0 ? `${head}<strong>Égalité !</strong><small>Pile le même score</small>`
     : `${head}<strong>Pas encore…</strong><small>Il te manque ${fmt(-diff)} points</small>`;
 }
+// ── Accroche de l'addition (v1.51) ──
+// Remplace l'avis Bof / Bien / Top (personne ne le touchait) : une phrase qui change selon la partie et donne une raison
+// précise de rejouer. D'abord la cible de score la plus proche (record du téléphone, place au classement de la semaine),
+// sinon un détail de la partie (médaille d'Hugo ratée de peu, Jérémie, menu jamais vu, combo).
+// Écrite à l'impression du ticket, puis réécrite quand le classement répond (Rank.onResult).
+const HOOK_NEAR = 0.3;   // au-delà de 30 % de la cible, l'écart décourage plus qu'il ne motive : on parle d'autre chose
+function hookLine(e, r) {
+  const S = e.score, fmt = (n) => n.toLocaleString('fr-FR');
+  const pts = (n) => `<mark>${fmt(n)}</mark> point${n > 1 ? 's' : ''}`;
+  const targets = [];   // { gap, html } : on garde le plus petit écart
+  const near = (gap, target) => gap > 0 && gap <= target * HOOK_NEAR;
+  // Record du téléphone
+  if (!e.rec && e.prev > 0) {
+    const gap = e.prev - S;
+    if (gap === 0) return 'Pile ton record ! Un point de plus et il tombait.';
+    if (near(gap, e.prev)) targets.push({ gap, html: `Tu es à ${pts(gap)} de ton record.` });
+  }
+  // Classement de la semaine : rang reçu pour cette partie…
+  let defend = null;
+  if (r && r.top && r.rang) {
+    const top = r.top, me = rankKey(r.nom);
+    if (r.rang === 1) {
+      const b = top[1];
+      if (!b) defend = 'Seul au tableau cette semaine : défie un pote !';
+      else {
+        const lead = r.meilleur - b.score, nom = esc(b.nom);
+        const sunday = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', weekday: 'short' }).format(new Date()) === 'Sun';
+        defend = lead <= 0 ? `${nom} a pile ton score : creuse l’écart pour garder ta place !`
+          : `${sunday ? 'Dernier jour pour garder ta place' : 'Défends ta place'} : ${nom} est à ${pts(lead)} derrière toi.`;
+      }
+    } else if (r.rang > top.length && top.length >= 10) {
+      const t = top[9].score, gap = t - S + 1;
+      if (near(gap, t)) targets.push({ gap, html: `Il te manquait ${pts(gap)} pour entrer dans le top 10.` });
+    } else {
+      const a = top[r.rang - 2];
+      if (a && rankKey(a.nom) !== me) {
+        const gap = a.score - S + 1;
+        if (near(gap, a.score)) targets.push({ gap, html: r.rang === 2 ? `Encore ${pts(gap)} et tu prends la 1re place à ${esc(a.nom)}.`
+          : `Encore ${pts(gap)} et tu passes devant ${esc(a.nom)} (${rankOrd(r.rang - 1)}).` });
+      }
+    }
+  }
+  if (targets.length) return targets.sort((x, y) => x.gap - y.gap)[0].html;
+  if (defend) return defend;
+  // Détails de la partie
+  if (e.hugo) {
+    const [n, T] = e.hugo.split('/').map(Number), tier = e.hugoTier || 0;
+    const tiers = [Math.round(T * cfg.hugoBronzeAt), Math.round(T * cfg.hugoArgentAt), T];
+    const miss = tier < 3 ? tiers[tier] - n : 0;
+    if (miss >= 1 && miss <= 3) return `Il te manquait ${miss} commande${miss > 1 ? 's' : ''} pour ${['le bronze', 'l’argent', 'l’or'][tier]} de Fabien.`;
+  }
+  const jv = e.jeremie || [];
+  if (jv.length && !jv.some((v) => v === 'approuve' || v === 'pompette' || v === 'shot')) return 'Marie attend toujours son chocolat doré : points ×2 à la clé.';
+  // Menu jamais tiré sur ce téléphone : de quoi revenir voir
+  const other = e.menu === 'alex' ? 'jeremie' : e.menu === 'jeremie' ? 'alex' : null;
+  if (other && !history.some((h) => h.menu === other || h.menu === 'tous')) {
+    return other === 'jeremie' ? 'La prochaine fois, Marie passera peut-être goûter ton chocolat…' : 'La prochaine fois, Michel débarquera peut-être avec sa blague…';
+  }
+  if (e.combo < 10) return 'Sers 10 commandes d’affilée sans faute : tes points passent à ×2.';
+  if (e.combo < 20) return `Meilleur combo : ${e.combo}. À 20 d’affilée, tes points passent à ×3 !`;
+  return 'Deux minutes, ça passe vite. On remet ça ?';
+}
+function fillHook(r) {
+  const el = $('eHook'), e = lastEnd;
+  if (!e) return;
+  // Un défi pas encore relevé dit déjà combien il manque : pas deux écarts l'un sous l'autre.
+  // v1.52 : tant que l'encadré demande le nom, c'est lui l'accroche (la place que prendrait ce score)
+  const html = (DEFI && !(e.score > DEFI.score)) || Rank.pending() ? '' : hookLine(e, r || null);
+  el.hidden = !html;
+  if (html === el.innerHTML) return;
+  // Le surligneur passe après le tampon ; réécrite plus tard (rang reçu), la phrase est surlignée tout de suite
+  el.style.setProperty('--hook-delay', Math.max(0, 1.45 - (performance.now() - (e.shownAt || 0)) / 1000).toFixed(2) + 's');
+  el.innerHTML = html;
+}
+Rank.onResult = (r) => { fillHook(r); $('bReplay').textContent = 'Rejouer'; $('bReplay').classList.remove('long'); };   // v1.52 : inscrit, plus de « quand même »
 function shareText() {
   const e = lastEnd;
   if (!e) return null;
@@ -787,7 +883,15 @@ async function shareScore() {
 }
 
 $('bStart').addEventListener('click', startGame);
-$('bReplay').addEventListener('click', startGame);
+// v1.52 : score pas encore inscrit (nouveau joueur) : le premier « Rejouer » de la session secoue l'encadré du nom au lieu de relancer
+let replayNudged = false;
+$('bReplay').addEventListener('click', () => {
+  // v1.53 : nom tapé mais « Inscrire » oublié : on l'inscrit en partant
+  const typed = $('eName').value.trim();
+  if (Rank.pending() && typed.length >= 2) { Rank.submit(typed); startGame(); return; }
+  if (!replayNudged && Rank.pending()) { replayNudged = true; Rank.nudge(); $('bReplay').textContent = 'Rejouer quand même'; $('bReplay').classList.add('long'); return; }
+  startGame();
+});
 $('bRankPlay').addEventListener('click', startGame);   // v1.45 : depuis le top 10
 $('bShare').addEventListener('click', shareScore);
 $('bInsta').addEventListener('click', instaTapped);
@@ -950,11 +1054,11 @@ $('pSimProf').addEventListener('click', (e) => {
 function renderHistory() {
   const box = $('pHist');
   if (!history.length) { box.innerHTML = '<p class="note">Aucune partie jouée pour l’instant.</p>'; return; }
-  const rate = { bof: 'Bof', bien: 'Bien', top: 'Top' };
-  box.innerHTML = `<div class="tbl"><table><thead><tr><th>Réglage</th><th>Score</th><th>Fabien</th><th>Ressenti</th></tr></thead><tbody>${history.slice(0, 15).map((h) => {
+  const menus = { alex: 'Michel', jeremie: 'Marie', tous: 'les trois' };
+  box.innerHTML = `<div class="tbl"><table><thead><tr><th>Réglage</th><th>Score</th><th>Fabien</th><th>Menu</th></tr></thead><tbody>${history.slice(0, 15).map((h) => {
     const alex = !h.alexOn ? 'sans Michel' : `${h.alexMode === 'miroir' ? 'miroir' : 'inversion'} ${h.alexShot === 'impose' ? 'imposé' : 'choix'}`;
     const tray = (h.trayMax || 1) > 1 ? `plateau ${h.trayMax}` : '1 verre';
-    return `<tr><th>${h.prep === 'simple' ? 'Simple' : 'Tirage'} · ${tray} · ${alex}</th><td>${h.score.toLocaleString('fr-FR')}</td><td>${h.hugo ? h.hugo + (h.hugoOk ? ' ✓' : '') : '—'}</td><td>${h.rating ? rate[h.rating] : '—'}</td></tr>`;
+    return `<tr><th>${h.prep === 'simple' ? 'Simple' : 'Tirage'} · ${tray} · ${alex}</th><td>${h.score.toLocaleString('fr-FR')}</td><td>${h.hugo ? h.hugo + (h.hugoOk ? ' ✓' : '') : '—'}</td><td>${menus[h.menu] || '—'}</td></tr>`;
   }).join('')}</tbody></table></div>`;
 }
 $('pHistClear').addEventListener('click', () => { history = []; store.set('history', history); renderHistory(); });
@@ -986,12 +1090,36 @@ function autoStep() {
 if (TEST) window.__galopins = {
   // v1.43 : mise en page de la story réglable depuis les tests (mode test seulement)
   storyLab: { layout: STORY_LAYOUT, draw: (info) => drawStory(info).toDataURL('image/jpeg', 0.9) },
+  hook: (e, r) => hookLine(Object.assign({}, lastEnd, e), r || null),   // v1.51 : accroche de l'addition pour un cas donné
   start: startGame, auto(p) { auto.on = true; auto.prof = BOT_PROFILES[p || 'bon']; }, get game() { return g; }, say(t) { say(t, 4, true); },
   friend(key) { const i = FRIENDS.findIndex((f) => f.key === key); const s = g && g.seats.find((c) => c && !c.isAlex && c.phase === 'wait'); if (i < 0 || !s) return false; s.look = 8 + i * 2; friendEvent({ type: 'spawn' }, s); return true; },
   get coach() { return { step: V.coach ? V.coach.kind : null, text: V.coachText, nudge: Coach.nudge && Coach.nudge.kind, learned: Object.assign({}, Coach.learned), paused: !!(g && g.learnPause), spot: V.spot }; },
 };
 
 // ── Démarrage ──
+// v1.60 : l'écran d'attente (template.html) s'efface à la première image du jeu.
+function bootDone() {
+  const b = $('boot'); if (!b) return;
+  b.classList.add('out');
+  setTimeout(() => b.remove(), 300);
+}
+// v1.60 : téléphone couché → écran « Tourne ton téléphone », partie en pause. On se fie au sens de l'écran,
+// pas seulement à la taille de la page : le clavier qui s'ouvre (nom du classement) réduit la hauteur sans coucher le téléphone.
+function landscapePhone() {
+  const w = window.innerWidth, h = window.innerHeight;
+  if (!(w > h && h < 520)) return false;
+  if (window.matchMedia && !window.matchMedia('(pointer: coarse)').matches) return false;
+  const o = window.screen && window.screen.orientation && window.screen.orientation.type;
+  if (o) return o.indexOf('landscape') === 0;
+  if (typeof window.orientation === 'number') return Math.abs(window.orientation) === 90;
+  return true;
+}
+function checkRot() {
+  const on = landscapePhone(), el = $('rot');
+  if (!el || el.hidden === !on) return;
+  el.hidden = !on;
+  if (on) pause();
+}
 function boot(data) {
   if (TEST && data && data.settings && !store.get('cfg2', null)) settings = Object.assign({}, DEFAULTS, data.settings);
   // Mode public : ni panneau de réglages, ni lien « Réglages » sur l'addition et la pause.
@@ -1000,13 +1128,16 @@ function boot(data) {
   resize();
   paintMenuArt();
   window.addEventListener('resize', resize);
+  window.addEventListener('resize', checkRot);
+  window.addEventListener('orientationchange', () => setTimeout(checkRot, 60));
+  checkRot();
   if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
   fillTitle();
   showScreen('sTitle');
   $('hud').hidden = true;
   Rank.defi = DEFI;   // le défi remplace le n° 1 de la semaine dans la bulle de Max
   Rank.init();
-  const go = () => requestAnimationFrame(frame);
+  const go = () => { requestAnimationFrame(frame); bootDone(); };
   if (document.fonts && document.fonts.load) {
     Promise.race([
       Promise.all([document.fonts.load(`28px ${FONT_P}`), document.fonts.load(`22px ${FONT_D}`), document.fonts.load(`700 12px ${FONT_T}`), document.fonts.load(`800 12px ${FONT_T}`)]),

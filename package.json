@@ -1,0 +1,9 @@
+{
+  "name": "volta-arcade",
+  "private": true,
+  "type": "module",
+  "description": "Volta Arcade · © Volta. Outil de construction : node build.mjs (esbuild compresse le code de la page).",
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

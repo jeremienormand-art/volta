@@ -32,6 +32,7 @@ const LIMITES = {
   pasMax: 216000,         // 1 h de jeu au plus, pauses d'apprentissage comprises
   partiesParHeure: 300,   // par adresse IP (le wifi du bar est partagé)
   top: 10,
+  tousScores: 3000,       // v1.54 : scores renvoyés à l'accueil pour situer une partie (≈ 6 octets chacun)
 };
 
 export default {
@@ -91,6 +92,9 @@ function schema(db) {
         pas INTEGER, gestes INTEGER, statut TEXT NOT NULL, version TEXT)`),
       db.prepare(`CREATE INDEX IF NOT EXISTS rejeux_cree ON rejeux (cree)`),
       db.prepare(`CREATE TABLE IF NOT EXISTS noms (cle TEXT PRIMARY KEY, empreinte TEXT NOT NULL, cree INTEGER NOT NULL)`),
+      // v1.54 : par jour (heure de Paris) : parties classées commencées, scores inscrits, nouveaux noms — pour mesurer l'inscription
+      db.prepare(`CREATE TABLE IF NOT EXISTS jours (jour TEXT PRIMARY KEY, parties INTEGER NOT NULL DEFAULT 0, inscrites INTEGER NOT NULL DEFAULT 0,
+        nouveaux INTEGER NOT NULL DEFAULT 0)`),
     ]).then(async () => {
       // v1.30 : graine de la partie, déposée avec le jeton (colonne ajoutée à la table existante ; déjà là → erreur ignorée)
       await db.prepare(`ALTER TABLE parties ADD COLUMN graine INTEGER`).run().catch(() => {});
@@ -105,7 +109,7 @@ function schema(db) {
 // GET /api/classement → le top de la semaine en cours
 async function classement(db) {
   const s = semaine(Date.now());
-  return json(Object.assign({ periode: 'semaine', semaine: s.cle, du: s.lundi, au: s.dimanche }, await tableau(db, s.cle)));
+  return json(Object.assign({ periode: 'semaine', semaine: s.cle, du: s.lundi, au: s.dimanche }, await tableau(db, s.cle, true)));
 }
 
 // GET /api/classement?periode=tout → le top de tous les temps
@@ -122,12 +126,16 @@ async function tableauTout(db) {
   return { top: top.results, joueurs: n.results[0].n, depuis: debut.results[0].t };
 }
 
-async function tableau(db, cle) {
-  const [top, n] = await db.batch([
+async function tableau(db, cle, tous) {
+  const [top, n, sc] = await db.batch([
     db.prepare(`SELECT nom, score FROM meilleurs WHERE semaine = ? ORDER BY score DESC, cree ASC LIMIT ?`).bind(cle, LIMITES.top),
     db.prepare(`SELECT COUNT(*) AS n FROM meilleurs WHERE semaine = ?`).bind(cle),
+    // v1.54 : tous les meilleurs scores de la semaine (sans les noms) : le téléphone situe n'importe quel score, pas seulement le top 10
+    db.prepare(`SELECT score FROM meilleurs WHERE semaine = ? ORDER BY score DESC LIMIT ?`).bind(cle, tous ? LIMITES.tousScores : 0),
   ]);
-  return { top: top.results, joueurs: n.results[0].n };
+  const t = { top: top.results, joueurs: n.results[0].n };
+  if (tous) t.scores = sc.results.map((r) => r.score);
+  return t;
 }
 
 // POST /api/partie → jeton à garder pendant la partie
@@ -139,7 +147,8 @@ async function partie(request, db) {
   const r = await db.prepare(`SELECT COUNT(*) AS n FROM parties WHERE ip = ? AND cree > ?`).bind(ip, maintenant - 3600e3).first();
   if (r.n >= LIMITES.partiesParHeure) return json({ erreur: 'Trop de parties d’un coup : fais une pause !', code: 'limite' }, 429);
   const id = crypto.randomUUID(), s = semaine(maintenant);
-  const ops = [db.prepare(`INSERT INTO parties (id, semaine, cree, ip, graine) VALUES (?, ?, ?, ?, ?)`).bind(id, s.cle, maintenant, ip, graine)];
+  const ops = [db.prepare(`INSERT INTO parties (id, semaine, cree, ip, graine) VALUES (?, ?, ?, ?, ?)`).bind(id, s.cle, maintenant, ip, graine),
+    db.prepare(`INSERT INTO jours (jour, parties) VALUES (?, 1) ON CONFLICT (jour) DO UPDATE SET parties = parties + 1`).bind(jourParis(maintenant))];
   // Ménage de temps en temps : les jetons de plus d'un jour ne servent plus.
   if (Math.random() < 0.02) ops.push(db.prepare(`DELETE FROM parties WHERE cree < ?`).bind(maintenant - 86400e3));
   await db.batch(ops);
@@ -174,7 +183,8 @@ async function score(request, env, ctx) {
   }
 
   // v1.30 : nom réservé au premier téléphone qui l'inscrit
-  const pris = await nomReserve(db, cle, b.cle, maintenant);
+  const info = {};
+  const pris = await nomReserve(db, cle, b.cle, maintenant, info);
   if (pris) return json({ erreur: 'Ce nom est déjà pris sur un autre téléphone. Choisis-en un autre.', code: 'nom-pris' }, 409);
 
   // v1.30 : rejeu de la partie. « exiger » : vérifié avant d'inscrire ; « observer » : après la réponse, sans rien refuser.
@@ -197,6 +207,9 @@ async function score(request, env, ctx) {
   // Le jeton ne sert qu'une fois : la mise à jour ne passe que s'il n'a pas encore été utilisé.
   const u = await db.prepare(`UPDATE parties SET utilise = 1 WHERE id = ? AND utilise = 0`).bind(b.partie).run();
   if (!u.meta.changes) return json({ erreur: 'Ce score est déjà inscrit.', code: 'deja' }, 409);
+  // v1.54 : compté au jour où la partie a commencé (un score gardé au chaud et inscrit plus tard compte pour sa partie)
+  await db.prepare(`INSERT INTO jours (jour, inscrites, nouveaux) VALUES (?, 1, ?) ON CONFLICT (jour) DO UPDATE SET inscrites = inscrites + 1, nouveaux = nouveaux + excluded.nouveaux`)
+    .bind(jourParis(p.cree), info.nouveau ? 1 : 0).run();
 
   const cleSemaine = p.semaine;
   const [, , moi, , moiTout] = await db.batch([
@@ -215,7 +228,7 @@ async function score(request, env, ctx) {
   const [avant, avantTout, t] = await Promise.all([
     db.prepare(`SELECT COUNT(*) AS n FROM meilleurs WHERE semaine = ? AND (score > ? OR (score = ? AND cree < ?))`).bind(cleSemaine, best.score, best.score, best.cree).first(),
     db.prepare(`SELECT COUNT(*) AS n FROM records WHERE score > ? OR (score = ? AND cree < ?)`).bind(bestTout.score, bestTout.score, bestTout.cree).first(),
-    tableau(db, cleSemaine),
+    tableau(db, cleSemaine, true),
   ]);
   const tout = { rang: avantTout.n + 1, meilleur: bestTout.score, record: bestTout.score === sc && bestTout.cree === maintenant };
   return json(Object.assign({ ok: true, semaine: cleSemaine, nom, score: sc, meilleur: best.score, record: best.score === sc && best.cree === maintenant, rang: avant.n + 1, tout }, t));
@@ -237,6 +250,11 @@ async function corps(request) {
 async function empreinte(ip) {
   const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('galopins|' + ip));
   return [...new Uint8Array(h).slice(0, 8)].map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+
+// v1.54 : date du jour à Paris (AAAA-MM-JJ)
+function jourParis(ms) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ms));
 }
 
 // Semaine du lundi au dimanche, heure de Paris. cle = date du lundi (AAAA-MM-JJ).
@@ -323,7 +341,7 @@ async function noterRejeu(db, r) {
 
 // Nom réservé : la première inscription d'un nom enregistre l'empreinte de la clé du téléphone (jamais la clé elle-même).
 // Renvoie true si le nom appartient à un autre téléphone. Une page sans clé (ancienne version) garde les noms encore libres.
-async function nomReserve(db, cle, secret, maintenant) {
+async function nomReserve(db, cle, secret, maintenant, info = {}) {
   const valide = typeof secret === 'string' && /^[0-9a-f]{32}$/.test(secret);
   let row = await db.prepare(`SELECT empreinte FROM noms WHERE cle = ?`).bind(cle).first();
   if (!valide) return !!row;
@@ -331,6 +349,7 @@ async function nomReserve(db, cle, secret, maintenant) {
   if (!row) {
     await db.prepare(`INSERT OR IGNORE INTO noms (cle, empreinte, cree) VALUES (?, ?, ?)`).bind(cle, h, maintenant).run();
     row = await db.prepare(`SELECT empreinte FROM noms WHERE cle = ?`).bind(cle).first();   // deux téléphones en même temps : le premier gagne
+    info.nouveau = !!row && row.empreinte === h;   // v1.54 : premier passage de ce nom au tableau
   }
   return !row || row.empreinte !== h;
 }
@@ -343,9 +362,10 @@ async function hachage(texte) {
 // GET /api/rejeu → bilan lisible des vérifications des 7 derniers jours
 async function bilan(env) {
   const db = env.DB, depuis = Date.now() - 7 * 86400e3;
-  const [parStatut, derniers] = await db.batch([
+  const [parStatut, derniers, jours] = await db.batch([
     db.prepare(`SELECT statut, COUNT(*) AS n FROM rejeux WHERE cree > ? GROUP BY statut`).bind(depuis),
     db.prepare(`SELECT cree, nom, annonce, calcule, statut FROM rejeux WHERE cree > ? AND statut NOT IN ('ok', 'absent') ORDER BY cree DESC LIMIT 15`).bind(depuis),
+    db.prepare(`SELECT jour, parties, inscrites, nouveaux FROM jours ORDER BY jour DESC LIMIT 14`),
   ]);
   const c = Object.fromEntries(parStatut.results.map((r) => [r.statut, r.n]));
   const total = parStatut.results.reduce((a, r) => a + r.n, 0);
@@ -366,6 +386,13 @@ async function bilan(env) {
     `  journal invalide ou graine changée  ${nb('invalide') + nb('graine')}`,
     `  erreur pendant le rejeu ........... ${nb('erreur')}`,
   ];
+  // v1.54 : combien de parties classées finissent au tableau (une partie abandonnée en route compte comme pas inscrite)
+  lignes.push('', 'Inscriptions par jour (parties classées commencées → scores inscrits) :');
+  if (!jours.results.length) lignes.push('  pas encore de partie comptée');
+  for (const j of jours.results) {
+    const pc = j.parties ? Math.round((100 * j.inscrites) / j.parties) : 0;
+    lignes.push(`  ${j.jour.slice(8, 10)}/${j.jour.slice(5, 7)} · ${j.parties} commencée${j.parties > 1 ? 's' : ''} · ${j.inscrites} inscrite${j.inscrites > 1 ? 's' : ''} (${pc} %) · ${j.nouveaux} nouveau${j.nouveaux > 1 ? 'x' : ''} nom${j.nouveaux > 1 ? 's' : ''}`);
+  }
   if (derniers.results.length) {
     lignes.push('', 'À regarder :');
     for (const r of derniers.results) lignes.push(`  ${quand(r.cree)} · ${r.nom} · annoncé ${fmt(r.annonce)} · rejoué ${fmt(r.calcule)} · ${NOMS[r.statut] || r.statut}`);

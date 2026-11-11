@@ -60,15 +60,29 @@ const LOGIC_ID = createHash('sha256').update(LOGIC).digest('hex').slice(0, 12);
 fs.writeFileSync(new URL('./worker/jeu.js', import.meta.url),
   `// Généré par build.mjs : ne pas modifier à la main (copie de src/config.js et src/core.js pour le Worker).\n` +
   `export const LOGIC_ID = '${LOGIC_ID}';\n${LOGIC}\nexport { DEFAULTS, Game, replayGame, GAME_STEP, REPLAY_CODES };\n`);
-const script = `const LOGIC_ID = '${LOGIC_ID}';\n` + fill(order.map((f) => `// ===== ${f} =====\n${src(f)}`).join('\n'), SCRIPT_ASSETS);
+// v1.56 (Galopins) : code et styles de la page compressés par esbuild (commentaires retirés, noms raccourcis, tout dans une fonction).
+// Les sources restent lisibles dans src/ (dépôt privé). Les images sont posées après la compression. Sans esbuild (`npm install`), page non compressée.
+let esbuild = null;
+try { esbuild = await import('esbuild'); } catch (e) { console.warn('esbuild absent (npm install) : page non compressée'); }
 // Thème (src/theme.js) : les {{marques}} de la page prennent les valeurs du lieu
 const THEME = new Function(src('theme.js') + '\nreturn THEME;')();
+const COPYRIGHT = `${THEME.copyright}. Tous droits réservés.`;
 const tag = THEME.insta ? '@' + THEME.insta : '';
 const MARKS = { ...THEME, tague: tag ? 'tague ' + tag : 'partage ton score', liTag: tag ? `<li><span>Tague <b>${tag}</b></span></li>` : '', taguant: tag ? ` en taguant <b>${tag}</b>` : '' };
-const html = src('template.html').replace(/\{\{(\w+)\}\}/g, (m, k) => { if (!(k in MARKS)) throw new Error('marque de thème inconnue : ' + k); return MARKS[k]; })
-  .replace('/*__STYLE__*/', () => fill(src('style.css'), STYLE_ASSETS))
+let code = `const LOGIC_ID = '${LOGIC_ID}';\n` + order.map((f) => `// ===== ${f} =====\n${src(f)}`).join('\n');
+let css = src('style.css');
+if (esbuild) {
+  code = (await esbuild.transform(`(() => {\n${code}\n})();`, { minify: true, charset: 'utf8', legalComments: 'none' })).code;
+  css = (await esbuild.transform(css, { loader: 'css', minify: true, charset: 'utf8', legalComments: 'none' })).code;
+}
+const script = `/*! ${THEME.jeu} · ${COPYRIGHT} */\n` + fill(code, SCRIPT_ASSETS);
+// Commentaires de la page retirés aussi ; seule la mention des droits reste en tête, visible par qui affiche le code source.
+const html = src('template.html').replace(/<!--[\s\S]*?-->\n?/g, '')
+  .replace(/\{\{(\w+)\}\}/g, (m, k) => { if (!(k in MARKS)) throw new Error('marque de thème inconnue : ' + k); return MARKS[k]; })
+  .replace('<meta name="author"', () => `<!-- ${THEME.jeu} · ${COPYRIGHT} -->\n<meta name="author"`)
+  .replace('/*__STYLE__*/', () => fill(css, STYLE_ASSETS))
   .replace('/*__SCRIPT__*/', () => script);
 fs.mkdirSync(new URL('./dist/', import.meta.url), { recursive: true });
 fs.writeFileSync(new URL('./dist/galopins-arcade.html', import.meta.url), html);
-console.log('dist/galopins-arcade.html', (html.length / 1024).toFixed(1) + ' Ko');
+console.log('dist/galopins-arcade.html', (html.length / 1024).toFixed(1) + ' Ko', esbuild ? '(code compressé)' : '(code non compressé)');
 console.log('worker/jeu.js', 'logique', LOGIC_ID);

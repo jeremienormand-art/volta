@@ -5,11 +5,29 @@ v1.26 : nombre d'expressions en 3e argument (Jérémie : 5, neutre, goûte, appr
   python3 tools/pack-friend.py assets/sources/jeremie.png assets/characters/jeremie.webp 5 0,0,0,-26,0
 (4e argument facultatif : décalage horizontal de chaque case en pixels de la case 192, ici pour garder la pinte de la grimace dans le cadre)
 Contrôle : test/out/friend_check.png montre l'ami à côté des clients existants, à taille égale.
-Puis dans src/portraits.js : ajouter l'image et l'entrée FRIENDS ; dans src/config.js : LOOKS + 2 ; dans build.mjs : la marque."""
+Puis dans src/portraits.js : ajouter l'image et l'entrée FRIENDS ; dans src/core.js : LOOKS + 2 ; dans build.mjs : la marque.
+v1.58 : --comme-clients (Jérémie : « les styles des clients ne sont pas totalement harmonisés ») : cases de 96 × 112 comme les clients
+de base, couleurs un peu plus chaudes et plus sombres, contour brun foncé d'un pixel. Utilisé pour tous les amis clients :
+  python3 tools/pack-friend.py assets/sources/nico.png assets/characters/nico.webp --comme-clients"""
 import os, sys
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
+
+def comme_clients(cell):
+    """Case 192 × 224 → 96 × 112 dans la famille des clients de base (même finesse, tons chauds, contour sombre)."""
+    c = cell.resize((96, 112), Image.LANCZOS)
+    a = np.array(c).astype(np.float32) / 255; rgb, al = a[..., :3], a[..., 3]
+    rgb = np.power(rgb, 1.10)                                            # milieux un peu plus sombres
+    lum = (0.299 * rgb[..., 0] + 0.587 * rgb[..., 1] + 0.114 * rgb[..., 2])[..., None]
+    rgb = np.clip((lum + (rgb - lum) * 1.06) * np.array([1.01, 0.99, 0.95]), 0, 1)   # un peu plus saturé et plus chaud
+    c = Image.fromarray((np.dstack([rgb, al]) * 255).astype(np.uint8), 'RGBA')
+    ring = Image.new('RGBA', c.size, (34, 20, 14, 0))
+    ring.putalpha(c.getchannel('A').point(lambda v: 255 if v > 100 else 0).filter(ImageFilter.MaxFilter(3)))
+    ring.alpha_composite(c); return ring
+
+CLIENTS = '--comme-clients' in sys.argv
+sys.argv = [a for a in sys.argv if a != '--comme-clients']
 src, out = sys.argv[1:3]
 N = int(sys.argv[3]) if len(sys.argv) > 3 else 4
 DX = [int(v) for v in sys.argv[4].split(',')] if len(sys.argv) > 4 else [0] * N
@@ -70,13 +88,19 @@ for i, (c, bb) in enumerate(zip(cells, bbs)):
     cell = Image.new('RGBA', (CW, CH), (0, 0, 0, 0))
     cell.paste(sc, (round(CW / 2 - head_cx(c, bb) * s) + DX[i], round(CH + 2 - bb[3] * s)), sc)
     strip.alpha_composite(cell, (0, i * CH))
-strip.save(out, 'WEBP', quality=90, method=6)
+if CLIENTS:
+    fine = strip; CW, CH = 96, 112
+    strip = Image.new('RGBA', (CW, CH * N), (0, 0, 0, 0))
+    for i in range(N): strip.alpha_composite(comme_clients(fine.crop((0, i * 224, 192, (i + 1) * 224))), (0, i * CH))
+    strip.save(out, 'WEBP', quality=92, method=6)
+else:
+    strip.save(out, 'WEBP', quality=90, method=6)
 os.makedirs('test/out', exist_ok=True)
 cust = Image.open('assets/characters/customers.webp').convert('RGBA')
 cw, ch = cust.width // 4, cust.height // 3
 S = Image.new('RGBA', (298 * 5, 336 * max(4, N)), (40, 32, 28, 255))
 for r in range(3):
     for c in range(4): S.alpha_composite(cust.crop((c * cw, r * ch, (c + 1) * cw, (r + 1) * ch)).resize((288, 336), Image.NEAREST), (c * 298, r * 336))
-for r in range(N): S.alpha_composite(strip.crop((0, r * CH, CW, (r + 1) * CH)).resize((288, 336), Image.LANCZOS), (4 * 298, r * 336))
+for r in range(N): S.alpha_composite(strip.crop((0, r * CH, CW, (r + 1) * CH)).resize((288, 336), Image.NEAREST if CLIENTS else Image.LANCZOS), (4 * 298, r * 336))
 S.convert('RGB').save('test/out/friend_check.png')
 print(out, 'coupes', cuts, 'échelle', round(s, 3))

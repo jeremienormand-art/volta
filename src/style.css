@@ -215,8 +215,33 @@ button { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anyw
 #sTitle .t-go { min-height: 60px; padding: 6px 12px 3px; font: 400 33px/1 var(--pixel); letter-spacing: 0.03em; border: 2px solid #3A2414;
   box-shadow: 0 4px 0 #3A2414, 0 8px 16px rgba(0,0,0,0.35); }
 #sTitle .t-go:active { transform: translateY(3px); box-shadow: 0 1px 0 #3A2414; }
-.t-best { margin: -2px 0 0; min-height: 22px; display: flex; align-items: center; justify-content: center; gap: 7px; font: 700 13px/1.2 var(--text); color: #F1DDB8; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
-.t-best strong { font: 400 23px/1 var(--pixel); color: #F7EBD5; letter-spacing: 0.02em; }
+/* v1.59 : record de l'accueil en chiffres pixel crème contournés, comme le score en partie */
+.t-hs { margin: 0; display: flex; align-items: center; gap: 7px; white-space: nowrap; text-align: left;
+  font: 400 15px/1 var(--pixel); letter-spacing: 0.12em; text-transform: uppercase; color: #F6C35B; text-shadow: 0 2px 0 #2A1A10, 0 0 6px rgba(0,0,0,0.8); }
+.t-hs[hidden] { display: none; }
+.t-hs .t-star { width: 26px; height: 26px; }
+.t-hs b { display: block; margin-top: 1px; font: 400 32px/0.9 var(--pixel); letter-spacing: 0.02em; color: #F7EBD5; -webkit-text-stroke: 5px #2A1A10; paint-order: stroke fill;
+  text-shadow: 0 3px 0 #2A1A10, 0 0 12px rgba(0,0,0,0.55); }
+#sTitle .t-foot:has(#tBest:not([hidden])):has(#bRank:not([hidden])) { justify-content: space-between; gap: 6px 10px; padding: 0 2px; }
+/* record et pinte sur une même ligne jusqu'à 320 px : tout se resserre un peu sur les petits écrans */
+@media (max-width: 400px) {
+  .t-hs { gap: 5px; font-size: 13px; }
+  .t-hs .t-star { width: 22px; height: 22px; }
+  .t-hs b { font-size: 28px; -webkit-text-stroke-width: 4px; }
+  #sTitle .t-foot:has(#tBest:not([hidden])) .t-rank.t-prize { padding: 5px 10px 3px 8px; gap: 6px; }
+  #sTitle .t-foot:has(#tBest:not([hidden])) .t-prize-t b { font-size: 17px; }
+  #sTitle .t-foot:has(#tBest:not([hidden])) .t-prize-t small { font-size: 11px; }
+  #sTitle .t-foot:has(#tBest:not([hidden])) .t-rank.t-prize .t-trophy { width: 24px; height: 24px; }
+}
+@media (max-width: 350px) {
+  .t-hs { font-size: 12px; letter-spacing: 0.08em; }
+  .t-hs .t-star { width: 18px; height: 18px; }
+  .t-hs b { font-size: 24px; }
+  #sTitle .t-foot:has(#tBest:not([hidden])) .t-prize-t b { font-size: 15px; letter-spacing: 0.01em; }
+  #sTitle .t-foot:has(#tBest:not([hidden])) .t-prize-t small { font-size: 10px; }
+  #sTitle .t-foot:has(#tBest:not([hidden])) .t-rank.t-prize { padding: 4px 8px 2px 6px; gap: 5px; }
+  #sTitle .t-foot:has(#tBest:not([hidden])) .t-rank.t-prize .t-trophy { width: 20px; height: 20px; }
+}
 .t-star { width: 20px; height: 20px; flex: 0 0 auto; background: var(--img-icons) 66.667% 0 / 400% 200% no-repeat; }
 .p-mode { justify-content: flex-start; margin: 12px 0 2px; }
 /* v1.10 : pas de rebond ni de « tirer pour rafraîchir » ; les écrans couvrent aussi les marges latérales du jeu. */
@@ -254,11 +279,12 @@ html, body { overscroll-behavior: none; }
 .receipt .r-stamp { display: block; width: max-content; margin: 12px auto 2px; padding: 5px 10px 2px; border: 3px solid var(--stamp); border-radius: 4px; color: var(--stamp);
   font: 400 23px/1 var(--pixel); letter-spacing: 0.05em; text-transform: uppercase; transform: rotate(-6deg); opacity: 0.88; mix-blend-mode: multiply;
   animation: r-stamp 0.32s cubic-bezier(0.2, 1.5, 0.4, 1) 1.05s both; }
-.r-ask { margin: 12px 0 6px; padding-top: 10px; border-top: 2px dashed rgba(43,38,34,0.45); font-size: 18px; color: var(--ink-soft); text-align: center; }
-.r-boxes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.r-boxes button { min-height: 40px; padding: 5px 6px 1px; background: transparent; color: var(--ink-r); border: 2px solid var(--ink-r); border-radius: 3px; font: 400 22px/1 var(--mono); }
-.r-boxes button[aria-pressed="true"] { background: var(--ink-r); color: var(--paper); }
-.r-thanks { margin: 12px 0 0; text-align: center; font-size: 21px; }
+/* v1.51 : accroche pour rejouer, le chiffre surligné au marqueur comme par le barman */
+.receipt .r-hook { margin: 12px 0 0; text-align: center; font-size: 22px; line-height: 1.12; text-wrap: balance; }
+.r-hook mark { padding: 0 3px; color: inherit; font-size: 25px; background: linear-gradient(100deg, rgba(255, 204, 51, 0.9), rgba(255, 196, 40, 0.75)) left 52% / 100% 72% no-repeat;
+  border-radius: 2px; animation: r-mark 0.42s ease-out var(--hook-delay, 1.45s) both; }
+.r-thanks { margin: 12px 0 0; padding-top: 10px; border-top: 2px dashed rgba(43,38,34,0.45); text-align: center; font-size: 21px; }
+.r-copy { margin: 8px 0 0; text-align: center; font-size: 15px; line-height: 1; color: var(--ink-soft); }   /* v1.56 */
 .r-fine { margin: 6px 0 0; text-align: center; font-size: 15px; line-height: 1.05; color: var(--ink-soft); }
 .end-actions { display: flex; flex-direction: column; gap: 8px; }
 /* ── v1.12 : visuels de ChatGPT ── */
@@ -268,7 +294,8 @@ html, body { overscroll-behavior: none; }
 
 @keyframes r-print { from { clip-path: inset(-8px -8px 100% -8px); transform: translateY(-12px); } to { clip-path: inset(-8px -8px -8px -8px); transform: none; } }
 @keyframes r-stamp { from { opacity: 0; transform: rotate(-6deg) scale(2.2); } to { opacity: 0.88; transform: rotate(-6deg) scale(1); } }
-@media (prefers-reduced-motion: reduce) { .receipt, .receipt .r-stamp { animation: none; } }
+@keyframes r-mark { from { background-size: 0% 72%; } to { background-size: 100% 72%; } }
+@media (prefers-reduced-motion: reduce) { .receipt, .receipt .r-stamp, .r-hook mark { animation: none; } }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 @keyframes t-rise { from { transform: translateY(48px); } to { transform: none; } }
@@ -286,14 +313,21 @@ html, body { overscroll-behavior: none; }
 /* ── Classement de la semaine (Cloudflare) ── */
 /* Accueil : bouton sur la ligne du record (aucune hauteur en plus) ; le score à battre est dans la bulle de Max */
 .t-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; margin-top: -2px; }
-.t-foot .t-best { margin: 0; }
 .t-rank { display: flex; align-items: center; gap: 6px; min-height: 34px; padding: 4px 12px 2px; background: rgba(24,17,12,0.55); border: 2px solid rgba(247,235,213,0.55);
   border-radius: 9px; color: #F7EBD5; font: 400 20px/1 var(--pixel); letter-spacing: 0.03em; box-shadow: 0 2px 0 rgba(20,12,8,0.5); white-space: nowrap; }
 .t-rank:active { background: rgba(24,17,12,0.8); transform: translateY(1px); }
 .t-rank .t-star { width: 16px; height: 16px; margin-top: -2px; }
 .t-say-rank { display: block; margin-top: 4px; color: #8A3E14; }
+/* v1.55 : le bouton du top annonce la pinte offerte au 1er de la semaine (cadre doré) */
+.t-rank.t-prize { min-height: 44px; padding: 5px 14px 3px 12px; gap: 8px; border-color: #F6C35B; background: rgba(40,24,10,0.72); }
+.t-rank.t-prize .t-trophy { width: 28px; height: 28px; }
+.t-prize-t { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+.t-prize-t b { font: 400 19px/1 var(--pixel); letter-spacing: 0.03em; color: #FFD27A; text-transform: uppercase; }
+.t-prize-t small { margin-top: 1px; font: 700 11.5px/1.2 var(--text); letter-spacing: 0; color: #F1DDB8; }
+/* Volta : pas de lot, le bouton du top garde son libellé (« Top 10 » sous 370 px, ou à côté du record sous 400 px) */
 .t-rank-s { display: none; }
 @media (max-width: 370px) { .t-rank-l { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .t-rank-s { display: inline; } .t-foot { gap: 6px 10px; } }
+@media (max-width: 400px) { #sTitle .t-foot:has(#tBest:not([hidden])) .t-rank-l { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } #sTitle .t-foot:has(#tBest:not([hidden])) .t-rank-s { display: inline; } }
 
 /* Addition : nom au tableau, rang, trois premiers */
 .r-rank { margin-top: 12px; padding-top: 10px; border-top: 2px dashed rgba(43,38,34,0.45); text-align: center; }
@@ -319,6 +353,25 @@ html, body { overscroll-behavior: none; }
 .r-rank-top .gap { justify-content: center; color: var(--ink-soft); line-height: 0.8; }
 .r-rank-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 16px; margin-top: 4px; }
 .r-rank-links:not(:has(> :not([hidden]))) { display: none; }
+/* v1.52 : inscription du premier score, encadrée juste sous le total */
+.receipt .r-join { margin: 12px 0 0; padding: 9px 10px 10px; border: 2px solid var(--ink-r); border-radius: 4px; background: rgba(255, 253, 246, 0.55); text-align: center; }
+.r-join-k { margin: -2px 0 4px; font: 400 18px/1 var(--pixel); letter-spacing: 0.04em; text-transform: uppercase; color: var(--stamp); }   /* v1.54 : la pinte du 1er */
+.r-join.done .r-join-k { display: none; }
+.r-join-h { margin: 0; font: 400 27px/0.95 var(--pixel); letter-spacing: 0.03em; text-transform: uppercase; }
+.r-join-s { margin: 3px 0 8px; font-size: 19px; line-height: 1.05; color: var(--ink-soft); text-wrap: balance; }
+.r-join-s b { font-weight: 400; color: var(--stamp); }
+.r-join .r-rank-row { align-items: stretch; }
+.r-join .r-rank-row input { height: 46px; padding: 4px 10px 0; background: #FFFDF6; border: 2px solid var(--ink-r); border-radius: 3px; font: 400 25px/1 var(--mono); }
+.r-join .r-rank-row input::placeholder { color: rgba(43, 38, 34, 0.42); }
+.r-join .r-rank-row button { min-height: 46px; padding: 4px 13px 0; background: var(--stamp); border-color: var(--stamp); color: #FFF8EE; font: 400 25px/1 var(--pixel); letter-spacing: 0.02em; text-transform: uppercase; }
+.r-join-msg { margin: 7px 0 0; font-size: 18px; line-height: 1.1; color: var(--stamp); text-wrap: balance; }
+.r-join.done { border-color: var(--stamp); color: var(--stamp); animation: r-pop 0.3s cubic-bezier(0.2, 1.5, 0.4, 1); }
+.r-join.done .r-rank-row { display: none; }
+.r-join.done .r-join-s { margin-bottom: 0; }
+.r-join.shake { animation: r-shake 0.45s; }
+@keyframes r-shake { 0%, 100% { transform: none; } 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+@keyframes r-pop { from { transform: scale(0.94); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .r-join.done, .r-join.shake { animation: none; } }
 .r-link { min-height: 36px; padding: 5px 2px 0; background: none; border: 0; color: var(--ink-r); font: 400 20px/1 var(--mono); text-decoration: underline; text-underline-offset: 3px; }
 
 .k-list { list-style: none; width: 100%; margin: 2px 0 0; padding: 0; display: grid; gap: 0; text-align: left; }
@@ -357,6 +410,7 @@ html, body { overscroll-behavior: none; }
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55); }
 .end-dock > button { min-height: 54px; margin: 0; }
 .end-dock .primary { padding: 6px 8px 3px; white-space: nowrap; overflow-wrap: normal; font: 400 31px/0.9 var(--pixel); letter-spacing: 0.03em; border: 2px solid #3A2414; box-shadow: 0 4px 0 #3A2414; }
+.end-dock .primary.long { white-space: normal; font-size: 23px; line-height: 0.92; }   /* v1.52 : « Rejouer quand même » sur deux lignes */
 .end-dock .primary:active { transform: translateY(3px); box-shadow: 0 1px 0 #3A2414; }
 .share { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 8px 3px; border-radius: 8px; border: 2px solid #4A2230;
   background: linear-gradient(#F8B8C7, #EC8EA6); color: #2B1219; font: 400 23px/0.9 var(--pixel); letter-spacing: 0.02em; box-shadow: 0 4px 0 #4A2230; transition: transform 0.06s; }
@@ -486,6 +540,7 @@ html, body { overscroll-behavior: none; }
 .k-laurel-r { background-position: 100% 0; }
 #sRank .k-title { margin: 0; font: 400 clamp(44px, 14vw, 60px)/0.8 var(--pixel); letter-spacing: 0.03em; text-transform: uppercase; color: #F7EBD5; text-wrap: balance;
   text-shadow: 0 3px 0 #9A5426, 0 6px 0 #3A2414, 0 10px 18px rgba(0,0,0,0.6); animation: p-drop 0.32s cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+.k-prize { margin: 0 0 2px; font: 400 19px/1 var(--pixel); letter-spacing: 0.03em; color: #F6C35B; text-shadow: 0 2px 0 #3A2414, 0 0 10px rgba(0,0,0,0.7); text-wrap: balance; }
 .k-week { margin: 6px 0 2px; font: 700 12.5px/1.35 var(--text); color: #F1DDB8; text-shadow: 0 1px 3px rgba(0,0,0,0.85); text-wrap: balance; }
 .k-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; width: 100%; max-width: 360px; padding: 3px; margin-top: 4px;
   background: rgba(24,17,12,0.6); border: 2px solid rgba(247,235,213,0.55); border-radius: 11px; box-shadow: 0 2px 0 rgba(20,12,8,0.5); }
@@ -538,3 +593,64 @@ html, body { overscroll-behavior: none; }
 #hud .hb svg { width: 72%; height: 72%; filter: drop-shadow(0 2px 0 #2A1A10) drop-shadow(0 0 1.5px #2A1A10) drop-shadow(0 0 6px rgba(0,0,0,0.8)); }   /* v1.50 : un peu plus grandes et plus ombrées */
 #hud .hb:active { transform: translateY(1px); opacity: 0.8; }
 #hud .hb.test { border: 1.5px solid var(--rose); color: var(--rose); background: rgba(24,17,12,0.6); }
+
+/* ── v1.60 : écran d'attente du chargement (retiré par main.js à la première image) ── */
+#boot, #rot { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 24px;
+  background: #241C19 radial-gradient(ellipse at 50% 38%, rgba(240,123,45,0.22), rgba(36,28,25,0) 62%); color: #F7EBD5; text-align: center; font-family: var(--text); }
+#boot p, #rot p { margin: 0; }
+#boot.out { opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+.boot-k { font: 400 22px/1 var(--pixel); letter-spacing: 0.34em; text-indent: 0.34em; text-transform: uppercase; color: #F6C35B; }
+.boot-logo { font: 400 clamp(72px, 25vw, 104px)/0.82 var(--pixel); letter-spacing: 0.03em; text-transform: uppercase; color: #F7EBD5; text-shadow: 0 3px 0 #C99356, 0 6px 0 #6A3F22, 0 9px 0 #2A1A10; }
+.boot-bar { width: min(220px, 62vw); height: 12px; margin: 34px 0 14px; border: 2px solid #3A2414; border-radius: 7px; background: #17110E; overflow: hidden; box-shadow: 0 2px 0 rgba(0,0,0,0.4); }
+.boot-bar i { display: block; width: 40%; height: 100%; border-radius: 5px; background: linear-gradient(#F6C35B, #E09A2B); animation: boot-run 1.15s ease-in-out infinite alternate; }
+@keyframes boot-run { from { transform: translateX(-12%); } to { transform: translateX(162%); } }
+.boot-t { font: 800 15px/1.3 var(--text); }
+.boot-slow, .boot-stuck { margin-top: 6px !important; font: 700 13px/1.35 var(--text); color: #E1CCA8; opacity: 0; animation: boot-in 0.4s linear 6s forwards; }
+.boot-stuck { color: #F39BB1; animation-delay: 25s; }
+@keyframes boot-in { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .boot-bar i { animation: none; width: 100%; opacity: 0.55; } }
+
+/* ── v1.60 : téléphone couché ── */
+#rot { z-index: 70; gap: 6px; }
+#rot[hidden] { display: none; }
+.rot-ph { width: 44px; height: 78px; margin-bottom: 14px; border: 3px solid #F7EBD5; border-radius: 9px; display: grid; place-items: end center; padding-bottom: 5px; animation: rot-turn 2.2s ease-in-out infinite; }
+.rot-ph i { width: 12px; height: 3px; border-radius: 2px; background: #F7EBD5; }
+@keyframes rot-turn { 0%, 18% { transform: rotate(-90deg); } 55%, 100% { transform: rotate(0deg); } }
+.rot-t { font: 400 34px/1 var(--pixel); letter-spacing: 0.03em; text-transform: uppercase; }
+.rot-s { font: 700 13.5px/1.35 var(--text); color: #E1CCA8; }
+@media (prefers-reduced-motion: reduce) { .rot-ph { animation: none; } }
+
+/* ── v1.60 : son et pause, zone de toucher de 44 px (34 avant) ; les icônes gardent leur taille et leur place ── */
+#hud { top: 0; right: calc(1px * var(--s)); gap: 0; align-items: center; }
+#hud .hb:not(.test) { width: calc(44px * var(--s)); height: calc(44px * var(--s)); }
+#hud .hb:not(.test) svg { width: 56%; height: 56%; }
+#hud .hb.test { margin-right: calc(5px * var(--s)); }
+
+/* ── v1.60 : addition sur écran court (iPhone SE, petits Android) : barre du bas resserrée, le ticket garde plus de place ── */
+@media (max-height: 700px) {
+  .end-dock { gap: 6px; padding: 6px; border-radius: 15px; }
+  .end-dock > button { min-height: 48px; }
+  .end-dock .primary { font-size: 29px; }
+  .insta { min-height: 36px; padding: 3px 10px 2px 9px; gap: 8px; }
+  .insta svg { width: 22px; height: 22px; }
+  .insta-t { flex-direction: row; align-items: baseline; column-gap: 8px; }
+  .insta b { font-size: 23px; }
+  .insta small { font-size: 11.5px; }
+  .insta-go { font-size: 28px; }
+}
+/* le @ du bar ne tient pas sur la même ligne sous 420 px de large : l'appel « Suis-nous sur Insta » reste, le lien ouvre le compte */
+@media (max-height: 700px) and (max-width: 419px) { .insta:not(.ok) small { display: none; } .insta.ok .insta-t { flex-direction: column; align-items: flex-start; } }
+/* très petits écrans (iPhone SE 1re génération, 568 px) : ticket resserré pour voir le total et l'accroche sans défiler */
+@media (max-height: 620px) {
+  .r-head { padding-bottom: 5px; }
+  .r-shop { font-size: 28px; }
+  .r-meta { margin-top: 3px; font-size: 15px; }
+  .receipt h2.r-title { margin: 6px 0 3px; font-size: 19px; }
+  .r-lines { gap: 0; font-size: 18px; }
+  .r-total { margin-top: 6px; padding-top: 7px; }
+  .r-total span { font-size: 21px; }
+  .r-total strong { font-size: 48px; }
+  .receipt .r-stamp { margin-top: 8px; font-size: 20px; }
+  .receipt .r-hook { margin-top: 8px; font-size: 20px; }
+  .r-hook mark { font-size: 22px; }
+}

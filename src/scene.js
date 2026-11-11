@@ -27,7 +27,7 @@ function say(text, dur = 1.3, force = false) {
 }
 function setMood(mood, dur = 0.8) { V.max.mood = mood; V.max.moodUntil = V.now + dur; }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-function floatText(x, y, s, color, size = 16, dur = 0.9) { V.floats.push({ x: Math.max(size * 3, Math.min(360 - size * 3, x)), y, s, color, size, t: 0, dur }); }
+function floatText(x, y, s, color, size = 16, dur = 0.9, opt = null) { V.floats.push({ x: Math.max(size * 3, Math.min(360 - size * 3, x)), y, s, color, size, t: 0, dur, rise: opt && opt.rise !== undefined ? opt.rise : 34, plate: !!(opt && opt.plate) }); }
 // Annonce en enseigne néon. tone : 'rose' | 'orange' | 'blanc' | 'faible' (néon fatigué qui décroche).
 // opt.delay : attendre avant de descendre l'enseigne ; opt.bell : la cloche de dernière commande au-dessus.
 function banner(title, sub, tone = 'blanc', dur = 1.6, opt = {}) {
@@ -137,8 +137,20 @@ function renderGame(ctx, g, cfg) {
   ctx.globalAlpha = 1;
   for (const f of V.floats) {
     const k = f.t / f.dur;
-    ctx.globalAlpha = k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3;
-    text(ctx, f.s, f.x, f.y - ease.out(k) * 34, f.size, f.color, { display: true, stroke: C.ink, strokeW: 4 });
+    ctx.globalAlpha = f.plate ? (k < 0.88 ? 1 : 1 - (k - 0.88) / 0.12) : k < 0.7 ? 1 : 1 - (k - 0.7) / 0.3;
+    const fy = f.y - ease.out(k) * f.rise;
+    if (f.plate) { // v1.60 : pastille sombre derrière le verdict du tirage, pour le lire sur le compteur du combo
+      const pix = f.size >= 15, fs = pix ? Math.round(f.size * 1.3) : f.size;
+      ctx.font = pix ? `400 ${fs}px ${FONT_P}` : `700 ${fs}px ${FONT_D}`;
+      const pw = Math.min(BAND.comboW - 2, ctx.measureText(f.s).width + 14), ph = fs * 0.86 + 8;
+      const pop = 0.8 + 0.2 * ease.back(Math.min(1, f.t / 0.14));
+      ctx.save(); ctx.translate(f.x, fy - fs * 0.3); ctx.scale(pop, pop); ctx.translate(-f.x, -(fy - fs * 0.3));
+      ctx.fillStyle = 'rgba(20,15,12,0.9)'; rr(ctx, f.x - pw / 2, fy - fs * 0.3 - ph / 2, pw, ph, 7); ctx.fill();
+      text(ctx, f.s, f.x, fy, f.size, f.color, { display: true });
+      ctx.restore();
+      continue;
+    }
+    text(ctx, f.s, f.x, fy, f.size, f.color, { display: true, stroke: C.ink, strokeW: 4 });
   }
   ctx.globalAlpha = 1;
   ctx.restore();
@@ -247,12 +259,13 @@ function drawComboSlate(ctx, g, now, x, y, w, h) {
       ctx.fillRect(bx + i * (sw + gap), by, sw, 5);
     }
     // v1.31 : une erreur fait perdre un palier ; « COMBO PERDU » seulement quand il retombe à zéro
-    text(ctx, brk ? (combo > 0 ? 'PALIER PERDU' : 'COMBO PERDU') : `${multLabel(comboMult(nx))} à ${nx}`, x + w / 2, y + 81, 9, brk ? C.bad : C.cremeD, { weight: 800 });
+    // v1.60 : « ×1,5 dans 3 » (ce qu'il reste à servir) au lieu de « ×1,5 à 5 », et en plus grand
+    text(ctx, brk ? (combo > 0 ? 'PALIER PERDU' : 'COMBO PERDU') : `${multLabel(comboMult(nx))} dans ${nx - combo}`, x + w / 2, y + 82, 11, brk ? C.bad : C.creme, { weight: 800 });
   } else {
     ctx.save(); ctx.globalAlpha = 0.7 + 0.3 * Math.sin(now * 6);
     ctx.fillStyle = C.rose; ctx.fillRect(bx, by, bw, 5);
     ctx.restore();
-    text(ctx, 'AU MAXIMUM', x + w / 2, y + 81, 9, C.rose, { weight: 800 });
+    text(ctx, 'AU MAXIMUM', x + w / 2, y + 82, 10.5, C.rose, { weight: 800 });
   }
 }
 
@@ -399,7 +412,8 @@ function drawStations(ctx, g, cfg, now) {
     }
     text(ctx, DRINK_NAMES[d].toUpperCase(), x, top + 125, 21, C.creme, { pixel: true });
     const cap = blocked ? 'plateau plein' : stationCaption(g, d);
-    if (cap) text(ctx, cap, x, top + 140, 10.5, cap === 'prêt !' ? C.rose : (blocked || cap === 'compléter') ? C.warn : C.cremeD, { weight: 700 });
+    // v1.60 (Galopins) : sous-titre plus grand et plus clair (10,5 px en crème foncé se lisait mal)
+    if (cap) text(ctx, cap, x, top + 141, cap.length > 10 ? 11.5 : 12.5, cap === 'prêt !' ? C.rose : (blocked || cap === 'compléter') ? C.warn : C.creme, { weight: 800 });
     ctx.restore();
   }
 }
@@ -546,14 +560,21 @@ function drawEventStrip(ctx, g, cfg, now) {
   } else if (g.alexActive()) {
     barPanel(ctx, 8, y, 344, h);
     drawCharacterFace(ctx, 12, y + 2, 38, h - 4, ALEX_SPEC, {mood:'proud'});
-    text(ctx, `MICHEL · POINTS ×${String(cfg.alexMult).replace('.', ',')}`, 54, titleY, 11, C.rose, {weight:800,align:'left'});
+    const alexX = `×${String(cfg.alexMult).replace('.', ',')}`;
     if (cfg.alexMode === 'inversion') {
-      for (const [a,b,x] of [['ipa','stout',65],['spritz','shot',159]]) {
-        drawGlass(ctx,a,x,detailY + (compact ? 3 : 6),compact ? 0.48 : 0.62,1);
-        drawUIIcon(ctx,'swap',x + 13,detailY - 12,compact ? 14 : 17);
-        drawGlass(ctx,b,x + 43,detailY + (compact ? 3 : 6),compact ? 0.48 : 0.62,1);
+      // v1.60 : la légende des échanges prend toute la hauteur du bandeau (verres de 18 px avant : illisibles en 12 s)
+      text(ctx, 'MICHEL', 54, y + (compact ? 14 : 20), 12, C.rose, {weight:800,align:'left'});
+      text(ctx, `points ${alexX}`, 54, y + (compact ? 27 : 36), 11, C.cremeD, {weight:800,align:'left'});
+      const sc = compact ? 0.82 : 1.1, base = y + h - (compact ? 4 : 7), sw = compact ? 17 : 21;
+      for (const [a,b,x] of [['ipa','stout',136],['spritz','shot',214]]) {
+        drawGlass(ctx,a,x,base,sc,1);
+        drawUIIcon(ctx,'swap',x + 17 - sw / 2,y + h / 2 - sw / 2,sw);
+        drawGlass(ctx,b,x + 34,base,b === 'shot' ? sc * 1.25 : sc,1);
       }
-    } else text(ctx, 'POSTES À L’ENVERS', 54, detailY, 10.5, C.cremeD, {weight:800,align:'left'});
+    } else {
+      text(ctx, `MICHEL · POINTS ${alexX}`, 54, titleY, 11, C.rose, {weight:800,align:'left'});
+      text(ctx, 'POSTES À L’ENVERS', 54, detailY, 10.5, C.cremeD, {weight:800,align:'left'});
+    }
     drawEventTimer(ctx, g.alex.effectEnd - g.t, cfg.alexDuration, 278, timerY, timerH);
   } else if (g.jer.state === 'seat' && g.seats[g.jer.seat] && g.seats[g.jer.seat].isJer && g.seats[g.jer.seat].phase !== 'leave') {
     // v1.26 : Jérémie au comptoir. Ce qu'il veut, ce qu'on y gagne, et le temps qu'il nous laisse.

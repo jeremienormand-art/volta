@@ -331,7 +331,7 @@ class Game {
   // ── Clients ──
   // v1.17 : jamais deux fois la même personne au comptoir (deux Nico en même temps, c'était bizarre).
   // Un seul tirage au hasard comme avant, parmi les visages encore libres ; l'ami d'une table de potes compte aussi
-  // et il est choisi lui aussi parmi les visages libres (4 places, 8 visages : il en reste toujours deux).
+  // et il est choisi lui aussi parmi les visages libres (4 places, 10 visages : il en reste toujours deux).
   pickLook(dbl) {
     const used = new Set();
     for (const s of this.seats) {
