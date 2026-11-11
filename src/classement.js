@@ -141,12 +141,12 @@ const Rank = {
     const lead = this.data && this.data.top && this.data.top[0];
     // Max annonce le score à battre dans sa bulle (pas de ligne en plus sur l'accueil)
     e.tRankLead.hidden = !this.up || !!this.defi;
-    // v1.53 : un nouveau venu sait d'avance qu'il s'inscrira. v1.55 : la pinte est annoncée sur le bouton du top, plus dans la bulle
+    // v1.53 : phrase en plus pour un joueur sans nom (v1.18 : « Nouveau PR cette semaine ? »). v1.55 : la pinte est annoncée sur le bouton du top, plus dans la bulle
     // v1.57 : le joueur qui mène la semaine ne se voit plus proposer de se battre lui-même
     const moi = lead && this.name && rankKey(lead.nom) === rankKey(this.name);
     e.tRankLead.textContent = (moi ? `Tu mènes la semaine avec ${rankFmt(lead.score)} ! Défends ta place.`
       : lead ? `À battre : ${lead.nom}, ${rankFmt(lead.score)} !` : 'Personne au tableau cette semaine : la place est libre !')
-      + (this.name ? '' : ' Ton nom au tableau à la fin.');
+      + (this.name ? '' : ' Nouveau PR cette semaine ?');
   },
 
   // ── Début de partie : jeton demandé tout de suite, la partie continue pendant ce temps ──
