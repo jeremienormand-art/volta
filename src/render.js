@@ -221,19 +221,38 @@ const TALK = {
     served: ['Merci champion !', 'Belle exécution !', 'Propre, la technique !'],
     wrong: 'C’est pas mon programme, ça !', left: 'Je file faire mes burpees !',
   },
+  // v1.21 (Jérémie) : chaque champ est facultatif. again : à l'arrivée, chance pAgain (0,5 par défaut) ; croissant : servi avec un croissant.
+  roxane: { again: ['Allô l’astreinte ?'], pAgain: 0.25 },   // Fanny
+  jordan: { again: ['Allô l’astreinte ?'], pAgain: 0.25 },
+  elea: { croissant: ['Super… Du gluten…'], pCroissant: 0.7 },
+  rayan: {
+    first: 'Ding ding ! Premier round !', reply: 'Pas de K.-O. au comptoir, hein !',
+    again: ['Adriaaaan !', 'L’œil du tigre !', 'Encore un round ?', 'Ding ding !'],
+    served: ['Vole comme le papillon, pique comme l’abeille !', 'Je suis le plus grand !', 'Champion du monde !'],
+    wrong: 'Tout le monde a un plan… jusqu’au premier coup.', left: 'J’encaisse… et j’avance.',
+  },
+  helene: {
+    first: 'Hélène, RH. T’as deux minutes ?', reply: 'Euh… c’est pour mon entretien annuel ?',
+    again: ['On cale un point d’étape ?', 'Pense à poser tes RTT !', 'Je reviens vers toi.', 'Ici, on est une famille.'],
+    served: ['Je note ça pour ton entretien annuel.', 'Ça mérite une prime… symbolique.', 'Avantage en nature validé.', 'Merci pour ton engagement !'],
+    wrong: 'Je vais devoir faire remonter ça.', left: 'J’ai un onboarding, je file !',
+  },
 };
 function linesOf(s) { const f = s && !s.isAlex ? friendOf(s.look) : null; return f ? TALK[f.key] : null; }
 // v1.26 : la bulle de Jérémie monte un peu, au-dessus de ce qu'il attend (« PINTE PARFAITE »)
 function talk(s, txt, dur = 2.3) { V.talk = V.talk.filter((b) => b.id !== s.id); V.talk.push({ id: s.id, x: L.seatX[s.seat], text: txt, t0: V.now, dur, lift: s.isJer ? 18 : 0 }); }
 function friendEvent(e, s) {
-  const t = linesOf(s);
+  const t = linesOf(s), k = t && friendOf(s.look).key;   // v1.21 : rencontre notée par personne (Rayan a deux indices, 0 et 4)
   if (!t) return;
   if (e.type === 'spawn') {
-    if (!V.met[s.look >> 1]) { V.met[s.look >> 1] = true; talk(s, t.first); if (t.reply) V.pendingSay = { text: t.reply, at: V.now + 1.4 }; }
-    else if (Math.random() < 0.5) talk(s, pick(t.again));
-  } else if (e.type === 'serve' && e.complete && Math.random() < 0.35) talk(s, pick(t.served), 1.6);
-  else if (e.type === 'wrong') talk(s, t.wrong, 1.8);
-  else if (e.type === 'left') talk(s, t.left, 2);
+    if (t.first && !V.met[k]) { V.met[k] = true; talk(s, t.first); if (t.reply) V.pendingSay = { text: t.reply, at: V.now + 1.4 }; }
+    else if (t.again && Math.random() < (t.pAgain ?? 0.5)) talk(s, pick(t.again));
+  } else if (e.type === 'serve' && e.complete) {
+    if (t.croissant && (e.drinks || []).includes('shot') && Math.random() < (t.pCroissant ?? 0.5)) talk(s, pick(t.croissant), 1.8);
+    else if (t.served && Math.random() < 0.35) talk(s, pick(t.served), 1.6);
+  }
+  else if (e.type === 'wrong' && t.wrong) talk(s, t.wrong, 1.8);
+  else if (e.type === 'left' && t.left) talk(s, t.left, 2);
 }
 function drawTalks(ctx, g, now) {
   for (const b of V.talk) {
