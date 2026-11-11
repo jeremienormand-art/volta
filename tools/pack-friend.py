@@ -30,7 +30,9 @@ CLIENTS = '--comme-clients' in sys.argv
 # v1.17 (Volta) : --zoom=K grossit l'ami de K autour du bas de la case (buste posé au même endroit), pour aligner
 # la taille des visages quand une coiffure haute (chignon, boucles) l'a fait rapetisser. Le haut de la coiffure peut être rogné.
 ZOOM = next((float(a.split('=')[1]) for a in sys.argv if a.startswith('--zoom=')), 1.0)
-sys.argv = [a for a in sys.argv if a != '--comme-clients' and not a.startswith('--zoom=')]
+# v1.20 (Volta) : --haut, avec --zoom, garde le haut de la tête dans la case (lunettes sur la tête d'Anaïs) : c'est le bas du buste qui est rogné.
+HAUT = '--haut' in sys.argv
+sys.argv = [a for a in sys.argv if a not in ('--comme-clients', '--haut') and not a.startswith('--zoom=')]
 src, out = sys.argv[1:3]
 N = int(sys.argv[3]) if len(sys.argv) > 3 else 4
 DX = [int(v) for v in sys.argv[4].split(',')] if len(sys.argv) > 4 else [0] * N
@@ -89,7 +91,8 @@ strip = Image.new('RGBA', (CW, CH * N), (0, 0, 0, 0))
 for i, (c, bb) in enumerate(zip(cells, bbs)):
     sc = c.resize((round(c.width * s), round(c.height * s)), Image.LANCZOS)
     cell = Image.new('RGBA', (CW, CH), (0, 0, 0, 0))
-    cell.paste(sc, (round(CW / 2 - head_cx(c, bb) * s) + DX[i], round(CH + 2 - bb[3] * s)), sc)
+    top = round(3 - bbs[0][1] * s) if HAUT else round(CH + 2 - bb[3] * s)
+    cell.paste(sc, (round(CW / 2 - head_cx(c, bb) * s) + DX[i], top), sc)
     strip.alpha_composite(cell, (0, i * CH))
 if CLIENTS:
     fine = strip; CW, CH = 96, 112

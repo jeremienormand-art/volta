@@ -12,7 +12,7 @@ Prompts et images de référence : `docs/chatgpt/`.
 - `max-accueil.png` — Max qui essuie un verre (accueil), coupe au bol comme en jeu.
 - `nico.png`, `roxane.png`, `jeremy.png` — amis clients, 4 expressions sur une ligne (`tools/pack-friend.py`).
 - `rayan.png`, `jordan.png`, `helene.png`, `kenza.png` (Volta, v1.17) — clients de la salle à la place des clients de base, 4 expressions sur une ligne (`tools/pack-friend.py … --comme-clients`, `--zoom=1.06` pour Rayan et Kenza).
-- `anais.webp` — bande d'Anaïs telle que venue de Galopins (3 expressions, cases 96 × 112), grossie par `tools/zoom-ami.py`.
+- `anais.png` (v1.20) — Anaïs, 4 expressions sur une ligne (lunettes sur la tête, badge beagle) : `tools/pack-friend.py assets/sources/anais.png assets/characters/anais.webp --zoom=1.12 --haut`. Remplace l'ancienne bande venue de Galopins (`anais.webp`, 3 expressions).
 
 Outil : `python3 tools/pack-chatgpt.py` (équipe, accueil, cartons et décors ci-dessous), puis `node build.mjs`.
 

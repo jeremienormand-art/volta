@@ -33,6 +33,7 @@ const DRINK_ART = new Image(); DRINK_ART.src = '__DRINK_ART_DATA__';
 // v1.18 : la stout en 6 étapes du même verre (vide → tiers laiteux → deux tiers → caramel → repos → parfaite), 6 cases 192 × 256.
 const STOUT_STEPS = new Image(); STOUT_STEPS.src = '__STOUT_STEPS_DATA__';
 const stoutStepsReady = () => STOUT_STEPS.complete && STOUT_STEPS.naturalWidth > 0;
+// v1.20 : nouvelle Anaïs (ChatGPT, lunettes sur la tête, badge beagle), 4 expressions comme les amis (pack-friend.py … --zoom=1.12 --haut).
 const ANAIS = new Image(); ANAIS.src = '__ANAIS_DATA__';
 // v1.13 : Nico, second serveur du Galopins (ChatGPT). Bande de 4 cases 192 × 224 : neutre, content, agacé, furieux.
 const NICO = new Image(); NICO.src = '__NICO_DATA__';
@@ -54,7 +55,7 @@ const SALLE = [{ key: 'rayan', img: RAYAN, rows: 4 }, { key: 'jordan', img: JORD
 // v1.26 : Jérémie, bande verticale de 5 cases 192 × 224 (tools/pack-friend.py … 5) : neutre (carnet), goûte, approuve, grimace, pompette.
 const JEREMIE = new Image(); if (JEREMIE_IN_PAGE) JEREMIE.src = JEREMIE_DATA;
 const JER_ROWS = 5, JER_ROW = { idle: 0, taste: 1, approve: 2, reject: 3, tipsy: 4 };
-const FRIENDS = [{ key: 'anais', img: ANAIS, rows: 3 }, { key: 'nico', img: NICO, rows: 4 }, { key: 'roxane', img: ROXANE, rows: 4 }, { key: 'jeremy', img: JEREMY, rows: 4 }, { key: 'elea', img: ELEA, rows: 4 }, { key: 'nise', img: NISE, rows: 4 }];
+const FRIENDS = [{ key: 'anais', img: ANAIS, rows: 4 }, { key: 'nico', img: NICO, rows: 4 }, { key: 'roxane', img: ROXANE, rows: 4 }, { key: 'jeremy', img: JEREMY, rows: 4 }, { key: 'elea', img: ELEA, rows: 4 }, { key: 'nise', img: NISE, rows: 4 }];
 function friendOf(look) { return look >= 8 ? FRIENDS[Math.floor((look - 8) / 2) % FRIENDS.length] : look >= 0 ? SALLE[look % 4] : null; }
 // Indice d'un visage d'après sa clé (panneau de test)
 function lookOfKey(key) { const i = FRIENDS.findIndex((f) => f.key === key), j = SALLE.findIndex((f) => f.key === key); return i >= 0 ? 8 + i * 2 : j; }
