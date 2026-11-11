@@ -624,7 +624,8 @@ function paintMenuArt() {
   const app = $('app');
   const set = (k, img) => app.style.setProperty(k, `url("${img.src}")`);
   set('--img-team', TEAM); set('--img-drinks', DRINK_ART); set('--img-tray', SERVING_TRAY);
-  set('--img-cust', CUSTOMERS); set('--img-icons', UI_ICONS); set('--img-wood', SERVICE_PANEL);
+  set('--img-cust', RAYAN);   // v1.17 : Rayan content (« Sers le bon client »)
+  set('--img-icons', UI_ICONS); set('--img-wood', SERVICE_PANEL);
   set('--menu-frame', STATION_PANEL);   // v1.25 : ardoise des menus = celle des stations (une seule copie dans la page)
   set('--img-maxf', ART.maxAccueil); set('--img-ticket', ART.ticket); set('--img-ardoise', ART.ardoise);
   document.documentElement.classList.add('art');   // les règles .art utilisent ces images
@@ -1092,7 +1093,7 @@ if (TEST) window.__galopins = {
   storyLab: { layout: STORY_LAYOUT, draw: (info) => drawStory(info).toDataURL('image/jpeg', 0.9) },
   hook: (e, r) => hookLine(Object.assign({}, lastEnd, e), r || null),   // v1.51 : accroche de l'addition pour un cas donné
   start: startGame, auto(p) { auto.on = true; auto.prof = BOT_PROFILES[p || 'bon']; }, get game() { return g; }, say(t) { say(t, 4, true); },
-  friend(key) { const i = FRIENDS.findIndex((f) => f.key === key); const s = g && g.seats.find((c) => c && !c.isAlex && c.phase === 'wait'); if (i < 0 || !s) return false; s.look = 8 + i * 2; friendEvent({ type: 'spawn' }, s); return true; },
+  friend(key) { const l = lookOfKey(key); const s = g && g.seats.find((c) => c && !c.isAlex && c.phase === 'wait'); if (l < 0 || !s) return false; s.look = l; friendEvent({ type: 'spawn' }, s); return true; },
   get coach() { return { step: V.coach ? V.coach.kind : null, text: V.coachText, nudge: Coach.nudge && Coach.nudge.kind, learned: Object.assign({}, Coach.learned), paused: !!(g && g.learnPause), spot: V.spot }; },
 };
 

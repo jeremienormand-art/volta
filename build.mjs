@@ -13,7 +13,6 @@ const SCRIPT_ASSETS = {
   __STATION_PANEL_DATA__: 'ui/station-slate.webp',
   __UI_ICONS_DATA__: 'ui/icons.webp',
   __TRAY_DATA__: 'ui/tray-metal.webp',
-  __CUSTOMERS_DATA__: 'characters/customers.webp',
   __ANAIS_DATA__: 'characters/anais.webp',
   // Visuels de ChatGPT (sources dans assets/sources/), découpés par tools/pack-chatgpt.py et tools/pack-friend.py
   __TEAM_DATA__: 'characters/team.webp',
@@ -25,6 +24,11 @@ const SCRIPT_ASSETS = {
   __JEREMY_DATA__: 'characters/jeremy.webp',
   __ELEA_DATA__: 'characters/elea.webp',   // Volta
   __NISE_DATA__: 'characters/nise.webp',   // Volta
+  // v1.17 (Volta) : à la place des clients de base de Galopins (customers.webp n'est plus dans la page, gardé comme référence de style)
+  __RAYAN_DATA__: 'characters/rayan.webp',
+  __JORDAN_DATA__: 'characters/jordan.webp',
+  __HELENE_DATA__: 'characters/helene.webp',
+  __KENZA_DATA__: 'characters/kenza.webp',
   __NEON_ON_DATA__: 'ui/neon-on.webp',
   __NEON_OFF_DATA__: 'ui/neon-off.webp',
   __BELL_DATA__: 'ui/bell.webp',

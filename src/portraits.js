@@ -44,13 +44,20 @@ const JEREMY = new Image(); JEREMY.src = '__JEREMY_DATA__';
 // Volta : Elea, cliente de la salle (même format que les amis)
 const ELEA = new Image(); ELEA.src = '__ELEA_DATA__';
 const NISE = new Image(); NISE.src = '__NISE_DATA__';
+// v1.17 (Volta) : Rayan, Jordan, Hélène et Kenza prennent les places des quatre clients de base de Galopins (indices 0-7,
+// visage = indice % 4). La logique (src/core.js : LOOKS, lookPerson) ne bouge pas : seuls les dessins changent, LOGIC_ID reste le même.
+const RAYAN = new Image(); RAYAN.src = '__RAYAN_DATA__';
+const JORDAN = new Image(); JORDAN.src = '__JORDAN_DATA__';
+const HELENE = new Image(); HELENE.src = '__HELENE_DATA__';
+const KENZA = new Image(); KENZA.src = '__KENZA_DATA__';
+const SALLE = [{ key: 'rayan', img: RAYAN, rows: 4 }, { key: 'jordan', img: JORDAN, rows: 4 }, { key: 'helene', img: HELENE, rows: 4 }, { key: 'kenza', img: KENZA, rows: 4 }];
 // v1.26 : Jérémie, bande verticale de 5 cases 192 × 224 (tools/pack-friend.py … 5) : neutre (carnet), goûte, approuve, grimace, pompette.
 const JEREMIE = new Image(); if (JEREMIE_IN_PAGE) JEREMIE.src = JEREMIE_DATA;
 const JER_ROWS = 5, JER_ROW = { idle: 0, taste: 1, approve: 2, reject: 3, tipsy: 4 };
 const FRIENDS = [{ key: 'anais', img: ANAIS, rows: 3 }, { key: 'nico', img: NICO, rows: 4 }, { key: 'roxane', img: ROXANE, rows: 4 }, { key: 'jeremy', img: JEREMY, rows: 4 }, { key: 'elea', img: ELEA, rows: 4 }, { key: 'nise', img: NISE, rows: 4 }];
-function friendOf(look) { return look >= 8 ? FRIENDS[Math.floor((look - 8) / 2) % FRIENDS.length] : null; }
-const CUSTOMERS = new Image();
-CUSTOMERS.src = '__CUSTOMERS_DATA__';
+function friendOf(look) { return look >= 8 ? FRIENDS[Math.floor((look - 8) / 2) % FRIENDS.length] : look >= 0 ? SALLE[look % 4] : null; }
+// Indice d'un visage d'après sa clé (panneau de test)
+function lookOfKey(key) { const i = FRIENDS.findIndex((f) => f.key === key), j = SALLE.findIndex((f) => f.key === key); return i >= 0 ? 8 + i * 2 : j; }
 // v1.19 : salle plus profonde, avec des gens attablés (ChatGPT, 30 octobre). v1.32 : nette partout, accueil et partie
 // (retours des testeurs : on préfère voir les clients attablés) ; plus de version floue ni de réglage « salle ».
 const ROOM_DEPTH = new Image(); ROOM_DEPTH.src = '__ROOM_DEPTH_DATA__';
@@ -88,27 +95,26 @@ function shadedCell(img, id, sx, sy, sw, sh, k) {
   return c;
 }
 function drawCustomerSprite(ctx, x, by, w, h, look, mood, shade = 0) {
-  const f = friendOf(look), img = f ? f.img : CUSTOMERS;
-  if (!img.complete || !img.naturalWidth) return false;
-  const cols = f ? 1 : 4, rows = f ? f.rows : 3;
-  // Le buste entier est dans l’atlas : aucune extension rectangulaire sous le sprite.
-  const sw = img.naturalWidth / cols, sh = img.naturalHeight / rows;
-  const sx = (f ? 0 : look % 4) * sw, sy = customerRow(mood, rows) * sh;
+  const f = friendOf(look), img = f && f.img;
+  if (!img || !img.complete || !img.naturalWidth) return false;
+  // Le buste entier est dans la bande : aucune extension rectangulaire sous le sprite.
+  const sw = img.naturalWidth, sh = img.naturalHeight / f.rows;
+  const sx = 0, sy = customerRow(mood, f.rows) * sh;
   const dx = Math.round(x - w / 2), dy = Math.round(by - h);
   ctx.save(); ctx.imageSmoothingEnabled = true;
-  if (shade > 0) ctx.drawImage(shadedCell(img, f ? f.key : 'clients', sx, sy, sw, sh, shade), dx, dy, w, h);
+  if (shade > 0) ctx.drawImage(shadedCell(img, f.key, sx, sy, sw, sh, shade), dx, dy, w, h);
   else ctx.drawImage(img, sx, sy, sw, sh, dx, dy, w, h);
   ctx.restore();
   return true;
 }
 
 
-// Case de Jérémie selon son humeur. Sans ses dessins : un client de l'atlas passé au noir (silhouette provisoire, aucun dessin en code).
+// Case de Jérémie selon son humeur. Sans ses dessins : un client (Jordan) passé au noir (silhouette provisoire, aucun dessin en code).
 function jeremieCell(mood) {
   if (artReady(JEREMIE)) { const sw = JEREMIE.naturalWidth, sh = JEREMIE.naturalHeight / JER_ROWS; return { img: JEREMIE, sx: 0, sy: (JER_ROW[mood] || 0) * sh, sw, sh }; }
-  if (!artReady(CUSTOMERS)) return null;
-  const sw = CUSTOMERS.naturalWidth / 4, sh = CUSTOMERS.naturalHeight / 3;
-  return { img: shadedCell(CUSTOMERS, 'clients', sw, 0, sw, sh, 0.94), sx: 0, sy: 0, sw, sh, ghost: true };
+  if (!artReady(JORDAN)) return null;
+  const sw = JORDAN.naturalWidth, sh = JORDAN.naturalHeight / 4;
+  return { img: shadedCell(JORDAN, 'jordan', 0, 0, sw, sh, 0.94), sx: 0, sy: 0, sw, sh, ghost: true };
 }
 function drawJeremieSprite(ctx, x, by, w, h, mood) {
   const c = jeremieCell(mood);

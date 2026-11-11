@@ -27,7 +27,10 @@ def comme_clients(cell):
     ring.alpha_composite(c); return ring
 
 CLIENTS = '--comme-clients' in sys.argv
-sys.argv = [a for a in sys.argv if a != '--comme-clients']
+# v1.17 (Volta) : --zoom=K grossit l'ami de K autour du bas de la case (buste posé au même endroit), pour aligner
+# la taille des visages quand une coiffure haute (chignon, boucles) l'a fait rapetisser. Le haut de la coiffure peut être rogné.
+ZOOM = next((float(a.split('=')[1]) for a in sys.argv if a.startswith('--zoom=')), 1.0)
+sys.argv = [a for a in sys.argv if a != '--comme-clients' and not a.startswith('--zoom=')]
 src, out = sys.argv[1:3]
 N = int(sys.argv[3]) if len(sys.argv) > 3 else 4
 DX = [int(v) for v in sys.argv[4].split(',')] if len(sys.argv) > 4 else [0] * N
@@ -81,7 +84,7 @@ def head_cx(im, bb, frac=0.35):
 cells = [im.crop((a, 0, b, im.height)) for a, b in cuts]
 CW, CH = 192, 224   # double des cases clients 96 × 112
 bbs = [bbox(c) for c in cells]; x0, y0, x1, y1 = bbs[0]
-s = (CH - 6) / (y1 - y0)
+s = (CH - 6) / (y1 - y0) * ZOOM
 strip = Image.new('RGBA', (CW, CH * N), (0, 0, 0, 0))
 for i, (c, bb) in enumerate(zip(cells, bbs)):
     sc = c.resize((round(c.width * s), round(c.height * s)), Image.LANCZOS)

@@ -208,7 +208,7 @@ button { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anyw
 .t-ico-tray { width: 66px; }
 .t-ico-tray::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 17px; background: var(--img-tray) center / 100% 100% no-repeat; }
 .t-ico-tray i { position: absolute; z-index: 1; left: 50%; bottom: 6px; width: 33px; height: 44px; margin-left: -16px; background: var(--img-drinks) 33.333% 0 / 400% 200% no-repeat; }
-.t-ico-cust { width: 47px; background-image: var(--img-cust); background-size: 400% 300%; background-position: 66.667% 50%; }
+.t-ico-cust { width: 47px; background-image: var(--img-cust); background-size: 100% 400%; background-position: 0 33.333%; }
 .t-steps b { font: 400 26px/0.95 var(--pixel); color: #F7EBD5; letter-spacing: 0.02em; }
 .t-steps small { font: 700 11px/1.25 var(--text); color: #CFBD99; }
 .t-note { margin: 0; font: 700 12.5px/1.4 var(--text); color: #F1DDB8; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.6); text-wrap: balance; }
