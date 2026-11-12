@@ -11,6 +11,7 @@ const RANK_SECRET_KEY = 'ga1.rankKey';   // v1.30 : clé du téléphone, qui ré
 // v1.53 : meilleur score pas inscrit (pas encore de nom), gardé sur le téléphone ; le jeton du serveur vaut 3 h depuis le début de la partie
 const RANK_HELD_KEY = 'ga1.rankHeld';
 const RANK_HELD_MS = 2.5 * 3600e3;
+const RANK_SCROLL_KEY = 'ga1.rankScrolled';   // v1.74 de Galopins : le joueur a déjà fait défiler le classement lui-même
 // Volta : pas de lot pour le 1er de la semaine (la pinte offerte est propre à Galopins, v1.54-v1.55).
 // v1.18 : visuels du classement (ChatGPT, découpés par tools/pack-rank.py), 7 cases de 128 × 128 :
 // 0 or · 1 argent · 2 bronze · 3 trophée (chope dorée) · 4 couronne à la craie · 5 laurier gauche · 6 laurier droit.
@@ -105,12 +106,17 @@ const Rank = {
   init() {
     const $r = (id) => document.getElementById(id);
     document.getElementById('app').style.setProperty('--img-rank', `url("${RANK_ART.src}")`);
-    for (const id of ['bRank', 'tRankLead', 'sRank', 'kTitle', 'kTabWeek', 'kTabAll', 'kWeek', 'kPrize', 'kScroll', 'kList', 'kEmpty', 'kMore', 'kMine', 'eRank', 'eRankForm', 'eJoinH', 'eJoinS', 'eJoinMsg', 'eName', 'eRankGo', 'eRankMsg', 'eRankTop', 'eRankAll', 'eRankRename', 'eRankRetry', 'eRankReset']) this.el[id] = $r(id);
+    for (const id of ['bRank', 'tRankLead', 'sRank', 'kTitle', 'kTabWeek', 'kTabAll', 'kWeek', 'kPrize', 'kScroll', 'kRail', 'kList', 'kEmpty', 'kMore', 'kMine', 'eRank', 'eRankForm', 'eJoinH', 'eJoinS', 'eJoinMsg', 'eName', 'eRankGo', 'eRankMsg', 'eRankTop', 'eRankAll', 'eRankRename', 'eRankRetry', 'eRankReset']) this.el[id] = $r(id);
     const e = this.el;
     e.bRank.addEventListener('click', () => this.open('sTitle'));
     e.kTabWeek.addEventListener('click', () => this.show('semaine'));
     e.kTabAll.addEventListener('click', () => this.show('tout'));
     e.kMine.addEventListener('click', () => this.seekMe(true));   // v1.73 : ta ligne épinglée mène à ta place dans la liste
+    // v1.74 : rail, fondus des bords et flèche de ta ligne suivent le défilement ; le premier défilement fait main est retenu (plus d'aperçu animé)
+    e.kScroll.addEventListener('scroll', () => this.rail(), { passive: true });
+    const learnt = () => { this._peekStop = true; if (!this.scrolled) { try { localStorage.setItem(RANK_SCROLL_KEY, '1'); } catch (err) { /* stockage indisponible */ } } };
+    for (const ev of ['touchmove', 'wheel']) e.kScroll.addEventListener(ev, learnt, { passive: true });
+    window.addEventListener('resize', () => { if (!e.sRank.hidden) this.rail(); });
     $r('bRankBack').addEventListener('click', () => this.close());
     e.eRankAll.addEventListener('click', () => this.open('sEnd'));
     e.eRankForm.addEventListener('submit', (ev) => { ev.preventDefault(); this.submit(e.eName.value); });
@@ -130,6 +136,7 @@ const Rank = {
     this.paintTitle();
     if (!this.el.sRank.hidden && this.tab === 'semaine') this.paintBoard();
   },
+  get scrolled() { try { return localStorage.getItem(RANK_SCROLL_KEY) === '1'; } catch (err) { return true; } },
   // v1.73 : le serveur renvoie aussi la place de ce nom (`moi`), même au-delà des 100 premiers
   who(sep) { return this.name ? sep + 'nom=' + encodeURIComponent(this.name) : ''; },
   async refreshAll() {
@@ -312,6 +319,38 @@ const Rank = {
     this._seek = from === 'sEnd';   // v1.73 : après une partie, la liste s'ouvre sur ta place ; depuis l'accueil, sur le podium
     this.tab = null;
     this.show('semaine');
+    this.peek();
+  },
+  // v1.74 : tant que le joueur n'a jamais fait défiler la liste lui-même, elle remonte un instant pour montrer qu'il y a une suite
+  // (comme le coach en partie : on montre le geste jusqu'à ce qu'il soit fait). Rien si le téléphone réduit les animations.
+  peek() {
+    if (this._seek || this.scrolled) return;
+    try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (err) { /* pas de media queries */ }
+    const sc = this.el.kScroll, go = (y) => { try { sc.scrollTo({ top: y, behavior: 'smooth' }); } catch (err) { sc.scrollTop = y; } };
+    this._peekStop = false;
+    clearTimeout(this._peekT);
+    this._peekT = setTimeout(() => {
+      if (this._peekStop || this.el.sRank.hidden || sc.scrollTop > 2 || sc.scrollHeight - sc.clientHeight < 80) return;
+      go(64);
+      this._peekT = setTimeout(() => { if (!this._peekStop && !this.el.sRank.hidden) go(0); }, 520);
+    }, 900);
+  },
+  // v1.74 : rail à la craie (position dans la liste), fondus en haut et en bas quand il reste des lignes cachées
+  rail() {
+    const e = this.el, sc = e.kScroll, max = sc.scrollHeight - sc.clientHeight, slate = e.kScroll.parentNode;
+    const can = max > 4 && !e.kList.hidden;
+    e.kRail.hidden = !can;
+    slate.classList.toggle('k-up', can && sc.scrollTop > 2);
+    const pinned = !e.kMine.hidden && !e.kMine.classList.contains('off');
+    slate.classList.toggle('k-down', can && sc.scrollTop < max - 2 && !pinned);
+    // v1.74 : la flèche de ta ligne épinglée montre où est ta ligne (plus haut ou plus bas dans la liste)
+    const li = this._mineLi;
+    e.kMine.classList.toggle('up', !!li && li.offsetTop + li.offsetHeight / 2 < sc.scrollTop);
+    if (!can) return;
+    const track = e.kRail.clientHeight, h = Math.max(22, Math.round(track * sc.clientHeight / sc.scrollHeight));
+    const th = e.kRail.firstElementChild;
+    th.style.height = h + 'px';
+    th.style.transform = `translateY(${Math.round((track - h) * Math.min(1, Math.max(0, sc.scrollTop / max)))}px)`;
   },
   show(tab) {
     if (this.tab && tab !== this.tab) this._seek = false;
@@ -359,7 +398,7 @@ const Rank = {
       if (m.rang === 1) gap = second ? (m.score > second.score ? `Tu mènes : <b>${rankFmt(m.score - second.score)} pts</b> d’avance sur ${esc(second.nom)}` : `${esc(second.nom)} a pile ton score : creuse l’écart !`) : 'Seul au tableau : défie un pote !';
       else if (above) gap = `<b>${rankFmt(above.score - m.score + 1)} pts</b> pour passer devant ${esc(above.nom)}`;
       else if (!all && d && Array.isArray(d.scores) && d.scores[m.rang - 2] != null) gap = `<b>${rankFmt(d.scores[m.rang - 2] - m.score + 1)} pts</b> pour gagner une place`;
-      e.kMine.innerHTML = `<span class="k-n">${m.rang}.</span><span class="k-nom">Toi · ${esc(name)}</span><span class="k-sc">${rankFmt(m.score)}</span>${gap ? `<small class="k-gap">${gap}</small>` : ''}`;
+      e.kMine.innerHTML = `<span class="k-n">${m.rang}.</span><span class="k-nom">Toi · ${esc(name)}</span><span class="k-sc">${rankFmt(m.score)}</span>${gap ? `<small class="k-gap">${gap}</small>` : ''}${mineLi ? '<span class="k-go" aria-hidden="true"></span>' : ''}`;
       e.kMine.setAttribute('aria-label', `Ta place : ${rankOrd(m.rang)} avec ${rankFmt(m.score)}`);
       e.kMine.hidden = false;
       if (mineLi) {
@@ -370,7 +409,12 @@ const Rank = {
           if (sc.scrollHeight - e.kMine.offsetHeight <= sc.clientHeight + 1) { e.kMine.hidden = true; return; }   // tout tient à l'écran : rien à épingler
           if (typeof IntersectionObserver === 'undefined') return;
           // Ta ligne à l'écran : la ligne épinglée s'efface (elle garde sa place, la liste ne saute pas)
-          this._io = new IntersectionObserver((ents) => { for (const en of ents) e.kMine.classList.toggle('off', en.intersectionRatio > 0.9); },
+          this._io = new IntersectionObserver((ents) => {
+            for (const en of ents) {
+              e.kMine.classList.toggle('off', en.intersectionRatio > 0.9);
+            }
+            this.rail();
+          },
             { root: sc, rootMargin: `0px 0px -${e.kMine.offsetHeight}px 0px`, threshold: [0, 0.9, 1] });
           this._io.observe(mineLi);
         });
@@ -383,6 +427,8 @@ const Rank = {
       e.kMine.textContent = name ? 'Pas encore au tableau cette semaine : à toi de jouer !' : 'Ton nom ici ? Inscris ton score à la fin d’une partie.';
       e.kMine.hidden = false;
     } else e.kMine.hidden = true;
+    e.kMine.classList.remove('up');
+    requestAnimationFrame(() => this.rail());
   },
   // v1.73 : fait défiler la liste jusqu'à ta ligne (au milieu de l'ardoise), qui s'illumine un instant
   seekMe(smooth) {

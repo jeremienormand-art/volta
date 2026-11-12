@@ -685,3 +685,23 @@ html, body { overscroll-behavior: none; }
   #sRank .k-head { gap: 4px; padding-bottom: 8px; }
   #sRank .k-tabs button { min-height: 34px; font-size: 19px; }
 }
+
+/* ── v1.74 : on voit que la liste défile ──
+   L'iPhone cache la barre de défilement : rail fin à la craie sur le bord droit de l'ardoise, toujours visible quand la liste dépasse ;
+   fondus du ton de l'ardoise en haut (lignes passées) et en bas (lignes qui suivent, quand ta ligne n'est pas épinglée) ;
+   à l'ouverture, tant que le joueur n'a jamais fait défiler lui-même, la liste remonte un instant puis revient (peek) ;
+   flèche sur ta ligne épinglée, vers le bas ou le haut selon où est ta ligne dans la liste. */
+.k-slate { position: relative; }
+.k-scroll { scrollbar-width: none; padding-right: 2px; }
+.k-scroll::-webkit-scrollbar { display: none; }
+.k-rail { position: absolute; top: 10px; bottom: 10px; right: 3px; width: 3px; border-radius: 2px; background: rgba(247,235,213,0.13); pointer-events: none; }
+.k-rail i { position: absolute; left: 0; top: 0; width: 100%; border-radius: 2px; background: rgba(247,235,213,0.6); box-shadow: 0 0 4px rgba(247,235,213,0.25); }
+.k-slate::before, .k-slate::after { content: ""; position: absolute; left: 6px; right: 10px; height: 26px; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+.k-slate::before { top: 0; background: linear-gradient(#22201D, rgba(34,32,29,0)); }
+.k-slate::after { bottom: 0; background: linear-gradient(rgba(34,32,29,0), #22201D); }
+.k-slate.k-up::before, .k-slate.k-down::after { opacity: 1; }
+#sRank .k-mine .k-gap { grid-column: 2 / 3; }
+#sRank .k-mine .k-go { grid-column: 3; grid-row: 2; justify-self: end; align-self: center; width: 9px; height: 9px; margin-right: 4px;
+  border: solid var(--rose); border-width: 0 2.5px 2.5px 0; transform: translateY(-3px) rotate(45deg); transition: transform 0.18s; }
+#sRank .k-mine.up .k-go { transform: translateY(2px) rotate(-135deg); }
+@media (prefers-reduced-motion: reduce) { .k-slate::before, .k-slate::after, #sRank .k-mine .k-go { transition: none; } }
