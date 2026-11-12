@@ -86,7 +86,7 @@
             <!-- v1.59 : le record en chiffres, comme le score en partie, à côté du bouton de la pinte -->
             <p id="tBest" class="t-hs" hidden><span class="t-star" aria-hidden="true"></span><span id="tBestL">Record<b id="tBestN"></b></span></p>
             <!-- v1.55 : le bouton du top porte le lot (choix C de Jérémie) -->
-            <button type="button" id="bRank" class="t-rank" hidden><span class="t-trophy" aria-hidden="true"></span><span class="t-rank-l">Top de la semaine</span><span class="t-rank-s" aria-hidden="true">Top 10</span></button>
+            <button type="button" id="bRank" class="t-rank" hidden><span class="t-trophy" aria-hidden="true"></span><span class="t-rank-l">Top de la semaine</span><span class="t-rank-s" aria-hidden="true">Le top</span></button>
           </div>
         </div>
       </div>
@@ -156,7 +156,7 @@
               <ol id="eRankTop" class="r-rank-top" hidden></ol>
               <div class="r-rank-links">
                 <button type="button" id="eRankRetry" class="r-link" hidden>Réessayer</button>
-                <button type="button" id="eRankAll" class="r-link" hidden>Voir le top 10</button>
+                <button type="button" id="eRankAll" class="r-link" hidden>Voir tout le classement</button>
                 <button type="button" id="eRankRename" class="r-link" hidden>Changer de nom</button>
                 <button type="button" id="eRankReset" class="r-link" hidden>Remettre les réglages par défaut</button>
               </div>
@@ -208,10 +208,14 @@
           <button type="button" role="tab" id="kTabAll" aria-selected="false">De tous les temps</button>
         </div>
       </div>
+      <!-- v1.73 de Galopins : tout le tableau défile dans l'ardoise (100 premiers) ; ta place reste épinglée en bas, avec l'écart pour monter d'un cran -->
       <div class="k-slate">
-        <ol id="kList" class="k-list"></ol>
-        <p id="kEmpty" class="k-empty" hidden>Personne encore cette semaine. À toi d’ouvrir le bal !</p>
-        <p id="kMine" class="k-mine" hidden></p>
+        <div id="kScroll" class="k-scroll">
+          <ol id="kList" class="k-list"></ol>
+          <p id="kEmpty" class="k-empty" hidden>Personne encore cette semaine. À toi d’ouvrir le bal !</p>
+          <p id="kMore" class="k-more" hidden></p>
+          <button type="button" id="kMine" class="k-mine" hidden></button>
+        </div>
       </div>
       <div class="t-bar k-bar">
         <div class="k-row">

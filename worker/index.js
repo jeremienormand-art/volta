@@ -31,7 +31,7 @@ const LIMITES = {
   gestesMax: 20000,       // journal d'une partie (≈ 430 gestes en moyenne)
   pasMax: 216000,         // 1 h de jeu au plus, pauses d'apprentissage comprises
   partiesParHeure: 300,   // par adresse IP (le wifi du bar est partagé)
-  top: 10,
+  top: 100,               // v1.73 de Galopins : tout le tableau défile (100 premiers), au lieu des 10 premiers
   tousScores: 3000,       // v1.54 : scores renvoyés à l'accueil pour situer une partie (≈ 6 octets chacun)
 };
 
@@ -66,7 +66,10 @@ async function api(request, env, url, ctx) {
   if (!env.DB) return json({ erreur: 'Classement pas encore branché.', code: 'indispo' }, 503);
   await schema(env.DB);
   const route = request.method + ' ' + url.pathname.replace(/\/+$/, '');
-  if (route === 'GET /api/classement') return url.searchParams.get('periode') === 'tout' ? classementTout(env.DB) : classement(env.DB);
+  if (route === 'GET /api/classement') {
+    const nom = url.searchParams.get('nom');   // v1.73 de Galopins : la place de ce joueur, même au-delà des 100 premiers
+    return url.searchParams.get('periode') === 'tout' ? classementTout(env.DB, nom) : classement(env.DB, nom);
+  }
   if (route === 'POST /api/partie') return partie(request, env.DB);
   if (route === 'POST /api/score') return score(request, env, ctx);
   if (route === 'GET /api/rejeu') return bilan(env);
@@ -107,14 +110,32 @@ function schema(db) {
 }
 
 // GET /api/classement → le top de la semaine en cours
-async function classement(db) {
+async function classement(db, nom) {
   const s = semaine(Date.now());
-  return json(Object.assign({ periode: 'semaine', semaine: s.cle, du: s.lundi, au: s.dimanche }, await tableau(db, s.cle, true)));
+  const [t, moi] = await Promise.all([tableau(db, s.cle, true), maPlace(db, nom, s.cle)]);
+  return json(Object.assign({ periode: 'semaine', semaine: s.cle, du: s.lundi, au: s.dimanche, moi }, t));
 }
 
 // GET /api/classement?periode=tout → le top de tous les temps
-async function classementTout(db) {
-  return json(Object.assign({ periode: 'tout' }, await tableauTout(db)));
+async function classementTout(db, nom) {
+  const [t, moi] = await Promise.all([tableauTout(db), maPlace(db, nom, null)]);
+  return json(Object.assign({ periode: 'tout', moi }, t));
+}
+
+// v1.73 de Galopins : rang et meilleur score d'un nom (semaine donnée, ou tous les temps si `cle` est vide). null : pas au tableau.
+// Même ordre que le top : meilleur score, et à égalité celui qui l'a fait le premier.
+async function maPlace(db, nom, cle) {
+  const n = nom ? nettoyerNom(nom) : null;
+  if (!n) return null;
+  const k = cleNom(n);
+  const m = cle
+    ? await db.prepare(`SELECT score, cree FROM meilleurs WHERE semaine = ? AND cle = ?`).bind(cle, k).first()
+    : await db.prepare(`SELECT score, cree FROM records WHERE cle = ?`).bind(k).first();
+  if (!m) return null;
+  const a = cle
+    ? await db.prepare(`SELECT COUNT(*) AS n FROM meilleurs WHERE semaine = ? AND (score > ? OR (score = ? AND cree < ?))`).bind(cle, m.score, m.score, m.cree).first()
+    : await db.prepare(`SELECT COUNT(*) AS n FROM records WHERE score > ? OR (score = ? AND cree < ?)`).bind(m.score, m.score, m.cree).first();
+  return { rang: a.n + 1, score: m.score };
 }
 
 async function tableauTout(db) {

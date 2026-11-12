@@ -105,11 +105,12 @@ const Rank = {
   init() {
     const $r = (id) => document.getElementById(id);
     document.getElementById('app').style.setProperty('--img-rank', `url("${RANK_ART.src}")`);
-    for (const id of ['bRank', 'tRankLead', 'sRank', 'kTitle', 'kTabWeek', 'kTabAll', 'kWeek', 'kPrize', 'kList', 'kEmpty', 'kMine', 'eRank', 'eRankForm', 'eJoinH', 'eJoinS', 'eJoinMsg', 'eName', 'eRankGo', 'eRankMsg', 'eRankTop', 'eRankAll', 'eRankRename', 'eRankRetry', 'eRankReset']) this.el[id] = $r(id);
+    for (const id of ['bRank', 'tRankLead', 'sRank', 'kTitle', 'kTabWeek', 'kTabAll', 'kWeek', 'kPrize', 'kScroll', 'kList', 'kEmpty', 'kMore', 'kMine', 'eRank', 'eRankForm', 'eJoinH', 'eJoinS', 'eJoinMsg', 'eName', 'eRankGo', 'eRankMsg', 'eRankTop', 'eRankAll', 'eRankRename', 'eRankRetry', 'eRankReset']) this.el[id] = $r(id);
     const e = this.el;
     e.bRank.addEventListener('click', () => this.open('sTitle'));
     e.kTabWeek.addEventListener('click', () => this.show('semaine'));
     e.kTabAll.addEventListener('click', () => this.show('tout'));
+    e.kMine.addEventListener('click', () => this.seekMe(true));   // v1.73 : ta ligne épinglée mène à ta place dans la liste
     $r('bRankBack').addEventListener('click', () => this.close());
     e.eRankAll.addEventListener('click', () => this.open('sEnd'));
     e.eRankForm.addEventListener('submit', (ev) => { ev.preventDefault(); this.submit(e.eName.value); });
@@ -125,12 +126,14 @@ const Rank = {
   },
 
   async refresh() {
-    try { this.data = await this.call('classement'); this.up = true; } catch (err) { this.up = false; }
+    try { this.data = await this.call('classement' + this.who('?')); this.up = true; } catch (err) { this.up = false; }
     this.paintTitle();
     if (!this.el.sRank.hidden && this.tab === 'semaine') this.paintBoard();
   },
+  // v1.73 : le serveur renvoie aussi la place de ce nom (`moi`), même au-delà des 100 premiers
+  who(sep) { return this.name ? sep + 'nom=' + encodeURIComponent(this.name) : ''; },
   async refreshAll() {
-    try { this.dataAll = await this.call('classement?periode=tout'); } catch (err) { /* on garde le dernier reçu */ }
+    try { this.dataAll = await this.call('classement?periode=tout' + this.who('&')); } catch (err) { /* on garde le dernier reçu */ }
     if (!this.el.sRank.hidden && this.tab === 'tout') this.paintBoard();
   },
 
@@ -206,7 +209,7 @@ const Rank = {
         const n = Math.max(d.joueurs || 0, all ? all.length : 0) + 1;
         const names = d.top.slice(0, 3).map((p) => esc(p.nom)).join(', ');
         if (above === 0) sub = hb ? `${who} est le meilleur de la semaine : ton nom en tête ?` : '<b>Meilleur score de la semaine !</b> Ton nom en tête du tableau ?';
-        else if (above < 10) sub = `${who} te place <b>${rankOrd(above + 1)}</b>${d.top[above] ? `, devant ${esc(d.top[above].nom)}` : ' de la semaine'} !`;
+        else if (above < d.top.length) sub = `${who} te place <b>${rankOrd(above + 1)}</b>${d.top[above] ? `, devant ${esc(d.top[above].nom)}` : ' de la semaine'} !`;
         else if (all) sub = `${who} te place <b>${rankOrd(above + 1)}</b> sur ${n}. ${names}… et toi ?`;
         else if (d.joueurs > 1) sub = `${hb ? who + ' t’attend. ' : ''}${names}… et toi ?`;
       }
@@ -250,7 +253,7 @@ const Rank = {
       end.sent = true;
       this.name = r.nom;   // v1.53 : retenu même si une partie a commencé entre-temps (nom tapé puis « Rejouer »)
       r = await this.sendHeld(r, end.payload.score, st.id);
-      this.data = { semaine: r.semaine, du: r.semaine, top: r.top, joueurs: r.joueurs, scores: r.scores };
+      this.data = Object.assign({}, this.data, { semaine: r.semaine, du: r.semaine, top: r.top, joueurs: r.joueurs, scores: r.scores, moi: { rang: r.rang, score: r.meilleur } });
       this.dataAll = null;   // le top de tous les temps a pu bouger : il sera relu à l'ouverture
       this.paintTitle();
       if (this.end !== end) return; // une autre partie a commencé entre-temps
@@ -288,7 +291,10 @@ const Rank = {
     ol.innerHTML = '';
     r.top.slice(0, 3).forEach((p, i) => ol.appendChild(rankRow(i + 1, p.nom, p.score, rankKey(p.nom) === me)));
     if (r.rang > 3) {
-      const gap = document.createElement('li'); gap.className = 'gap'; gap.setAttribute('aria-hidden', 'true'); gap.textContent = '· · ·'; ol.appendChild(gap);
+      // v1.73 : le joueur juste devant toi, celui à doubler
+      const a = r.rang > 4 && r.top[r.rang - 2];
+      if (r.rang > (a ? 5 : 4)) { const gap = document.createElement('li'); gap.className = 'gap'; gap.setAttribute('aria-hidden', 'true'); gap.textContent = '· · ·'; ol.appendChild(gap); }
+      if (a) ol.appendChild(rankRow(r.rang - 1, a.nom, a.score, false));
       ol.appendChild(rankRow(r.rang, r.nom, r.meilleur, true));
     }
     ol.hidden = false;
@@ -303,35 +309,87 @@ const Rank = {
     document.getElementById('bRankPlay').textContent = from === 'sEnd' ? 'Rejouer' : THEME.ouvrir;
     showScreen('sRank');
     this.el.sRank.scrollTop = 0;
+    this._seek = from === 'sEnd';   // v1.73 : après une partie, la liste s'ouvre sur ta place ; depuis l'accueil, sur le podium
+    this.tab = null;
     this.show('semaine');
   },
   show(tab) {
+    if (this.tab && tab !== this.tab) this._seek = false;
     this.tab = tab;
+    this.el.kScroll.scrollTop = 0;
     this.paintBoard();
     if (tab === 'tout') this.refreshAll(); else this.refresh();
   },
   close() { showScreen(this.back); },
   paintBoard() {
-    const e = this.el, all = this.tab === 'tout', d = all ? this.dataAll : this.data;
+    const e = this.el, all = this.tab === 'tout', d = all ? this.dataAll : this.data, n = (d && d.joueurs) || 0;
     e.kTabWeek.setAttribute('aria-selected', String(!all)); e.kTabAll.setAttribute('aria-selected', String(all));
     e.kTitle.textContent = all ? 'Top de tous les temps' : 'Top de la semaine';
+    // v1.73 : le nombre de joueurs se voit tout de suite
+    const nb = n ? `${n} joueur${n > 1 ? 's' : ''}` : '';
     if (all) {
       const depuis = d && d.depuis ? new Date(d.depuis).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }) : null;
-      e.kWeek.textContent = depuis ? `Meilleur score de chacun depuis le ${depuis}` : 'Meilleur score de chacun, jamais remis à zéro';
-    } else {
-      const du = d && (d.du || d.semaine);
-      e.kWeek.textContent = du ? `Semaine du lundi ${new Date(du + 'T12:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', timeZone: 'UTC' })} · remise à zéro lundi` : 'Remise à zéro chaque lundi';
-    }
+      e.kWeek.textContent = (nb ? nb + ' · ' : '') + (depuis ? `meilleur score de chacun depuis le ${depuis}` : 'meilleur score de chacun, jamais remis à zéro');
+    } else e.kWeek.textContent = (nb ? nb + ' cette semaine' : 'Cette semaine') + ' · remise à zéro lundi';
     e.kPrize.hidden = true;   // Volta : pas de lot
-    const me = rankKey(this.name), top = (d && d.top) || [];
+    const name = this.name, me = rankKey(name), top = (d && d.top) || [];
     e.kList.innerHTML = '';
-    top.forEach((p, i) => e.kList.appendChild(rankRow(i + 1, p.nom, p.score, !!me && rankKey(p.nom) === me)));
+    let mineLi = null, idx = -1;
+    top.forEach((p, i) => {
+      const mine = !!me && rankKey(p.nom) === me, li = rankRow(i + 1, p.nom, p.score, mine);
+      if (mine && !mineLi) { mineLi = li; idx = i; }
+      e.kList.appendChild(li);
+    });
     e.kList.hidden = !top.length; e.kEmpty.hidden = !!top.length || !d;
     e.kEmpty.textContent = all ? 'Personne au tableau pour l’instant.' : 'Personne encore cette semaine. À toi d’ouvrir le bal !';
-    const l = this.last, mineRang = l && (all ? l.tout && l.tout.rang : d && l.semaine === d.semaine && l.rang);
-    const mine = !!mineRang && mineRang > top.length;
-    e.kMine.hidden = !mine;
-    if (mine) e.kMine.textContent = `Toi : ${rankOrd(mineRang)} avec ${rankFmt(all ? l.tout.meilleur : l.meilleur)}`;
+    // v1.73 : au-delà des 100 premiers, le nombre de joueurs qui suivent
+    const rest = n - top.length;
+    e.kMore.hidden = rest <= 0;
+    if (rest > 0) e.kMore.textContent = `… et ${rest} autre${rest > 1 ? 's' : ''} joueur${rest > 1 ? 's' : ''}`;
+    // v1.73 : ta place, épinglée en bas de l'ardoise tant que ta ligne n'est pas à l'écran, avec l'écart pour monter d'un cran
+    const l = this.last, fromLast = l && (all ? l.tout && { rang: l.tout.rang, score: l.tout.meilleur } : d && l.semaine === d.semaine && { rang: l.rang, score: l.meilleur });
+    const m = idx >= 0 ? { rang: idx + 1, score: top[idx].score } : (d && d.moi) || fromLast || null;
+    this._mineLi = mineLi;
+    if (this._io) { this._io.disconnect(); this._io = null; }
+    e.kMine.classList.remove('off', 'k-mine-note');
+    e.kMine.disabled = false;
+    if (m && m.rang && name) {
+      const above = top[m.rang - 2], second = m.rang === 1 && top[1];
+      let gap = '';
+      if (m.rang === 1) gap = second ? (m.score > second.score ? `Tu mènes : <b>${rankFmt(m.score - second.score)} pts</b> d’avance sur ${esc(second.nom)}` : `${esc(second.nom)} a pile ton score : creuse l’écart !`) : 'Seul au tableau : défie un pote !';
+      else if (above) gap = `<b>${rankFmt(above.score - m.score + 1)} pts</b> pour passer devant ${esc(above.nom)}`;
+      else if (!all && d && Array.isArray(d.scores) && d.scores[m.rang - 2] != null) gap = `<b>${rankFmt(d.scores[m.rang - 2] - m.score + 1)} pts</b> pour gagner une place`;
+      e.kMine.innerHTML = `<span class="k-n">${m.rang}.</span><span class="k-nom">Toi · ${esc(name)}</span><span class="k-sc">${rankFmt(m.score)}</span>${gap ? `<small class="k-gap">${gap}</small>` : ''}`;
+      e.kMine.setAttribute('aria-label', `Ta place : ${rankOrd(m.rang)} avec ${rankFmt(m.score)}`);
+      e.kMine.hidden = false;
+      if (mineLi) {
+        requestAnimationFrame(() => {
+          if (this._mineLi !== mineLi) return;
+          if (this._seek) { this._seek = false; this.seekMe(false); }
+          const sc = e.kScroll;
+          if (sc.scrollHeight - e.kMine.offsetHeight <= sc.clientHeight + 1) { e.kMine.hidden = true; return; }   // tout tient à l'écran : rien à épingler
+          if (typeof IntersectionObserver === 'undefined') return;
+          // Ta ligne à l'écran : la ligne épinglée s'efface (elle garde sa place, la liste ne saute pas)
+          this._io = new IntersectionObserver((ents) => { for (const en of ents) e.kMine.classList.toggle('off', en.intersectionRatio > 0.9); },
+            { root: sc, rootMargin: `0px 0px -${e.kMine.offsetHeight}px 0px`, threshold: [0, 0.9, 1] });
+          this._io.observe(mineLi);
+        });
+      }
+    } else if (!all && d) {
+      // Pas encore au tableau cette semaine
+      e.kMine.classList.add('k-mine-note');
+      e.kMine.disabled = true;
+      e.kMine.removeAttribute('aria-label');
+      e.kMine.textContent = name ? 'Pas encore au tableau cette semaine : à toi de jouer !' : 'Ton nom ici ? Inscris ton score à la fin d’une partie.';
+      e.kMine.hidden = false;
+    } else e.kMine.hidden = true;
+  },
+  // v1.73 : fait défiler la liste jusqu'à ta ligne (au milieu de l'ardoise), qui s'illumine un instant
+  seekMe(smooth) {
+    const li = this._mineLi, sc = this.el.kScroll, go = (y) => { try { sc.scrollTo({ top: y, behavior: smooth ? 'smooth' : 'auto' }); } catch (err) { sc.scrollTop = y; } };
+    if (!li) { go(sc.scrollHeight); return; }
+    go(Math.max(0, li.offsetTop - (sc.clientHeight - li.offsetHeight) / 2));
+    li.classList.remove('flash'); void li.offsetWidth; li.classList.add('flash');
   },
 };
 

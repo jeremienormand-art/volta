@@ -654,3 +654,34 @@ html, body { overscroll-behavior: none; }
   .receipt .r-hook { margin-top: 8px; font-size: 20px; }
   .r-hook mark { font-size: 22px; }
 }
+
+/* ── v1.73 de Galopins : tout le classement défile dans l'ardoise ──
+   Le titre et les onglets restent en place, la liste (100 premiers) défile dans l'ardoise ; ta place reste épinglée en bas
+   tant que ta ligne n'est pas à l'écran, avec l'écart pour passer devant le joueur juste au-dessus. Toucher : la liste file jusqu'à toi. */
+.k-slate { flex: 0 1 auto; min-height: 176px; display: flex; flex-direction: column; }
+.k-scroll { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin; scrollbar-color: rgba(247,235,213,0.35) transparent; }
+.k-scroll::-webkit-scrollbar { width: 4px; }
+.k-scroll::-webkit-scrollbar-thumb { background: rgba(247,235,213,0.35); border-radius: 2px; }
+.k-list li.flash { animation: k-flash 1.3s ease-out; }
+@keyframes k-flash { 0%, 35% { background: rgba(243,155,177,0.55); } 100% { background: rgba(243,155,177,0.16); } }
+.k-more { margin: 6px 4px 4px; text-align: center; font: 700 12.5px/1.4 var(--text); color: rgba(247,235,213,0.6); }
+#sRank .k-mine { position: sticky; bottom: 0; z-index: 1; display: grid; grid-template-columns: 2.1em minmax(0, 1fr) auto; align-items: baseline; gap: 2px 8px;
+  width: 100%; margin: 4px 0 0; padding: 7px 6px 6px; text-align: left; color: #F7EBD5; font: inherit; cursor: pointer;
+  background: linear-gradient(rgba(243,155,177,0.24), rgba(243,155,177,0.24)), #2A2624; border: 0; border-top: 2px solid var(--rose); border-radius: 6px;
+  box-shadow: 0 -8px 14px rgba(10,8,6,0.55); transition: opacity 0.18s, transform 0.18s; }
+#sRank .k-mine .k-n { font: 400 24px/1 var(--pixel); text-align: right; color: var(--rose); }
+#sRank .k-mine .k-nom { font: 700 15px/1.2 var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#sRank .k-mine .k-sc { font: 400 24px/1 var(--pixel); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+#sRank .k-mine .k-gap { grid-column: 2 / -1; font: 700 12px/1.3 var(--text); color: #F1DDB8; }
+#sRank .k-mine .k-gap b { color: var(--rose); font-weight: 800; }
+#sRank .k-mine:active { transform: translateY(1px); }
+#sRank .k-mine.off { opacity: 0; transform: translateY(10px); pointer-events: none; }
+#sRank .k-mine.k-mine-note { display: block; text-align: center; padding: 8px 10px; font: 700 13px/1.4 var(--text); color: #F1DDB8; cursor: default;
+  background: #2A2624; border-top-color: rgba(247,235,213,0.3); }
+@media (prefers-reduced-motion: reduce) { .k-list li.flash { animation: none; } #sRank .k-mine { transition: none; } }
+@media (max-height: 640px) {
+  #sRank .k-crest { display: none; }   /* v1.73 de Galopins : une ou deux lignes de plus dans la liste sur les petits écrans */
+  #sRank .k-head { gap: 4px; padding-bottom: 8px; }
+  #sRank .k-tabs button { min-height: 34px; font-size: 19px; }
+}
